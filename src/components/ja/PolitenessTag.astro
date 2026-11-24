@@ -1,0 +1,31 @@
+---
+/** Shows the politeness level of a phrase. Dots + text, so it never relies on color. */
+import type { Politeness } from '@/lib/types';
+interface Props {
+  level: Politeness;
+  class?: string;
+}
+const { level, class: className } = Astro.props;
+const meta = {
+  casual: { en: 'Casual', ja: 'タメ口', dots: 1 },
+  teinei: { en: 'Polite', ja: 'です・ます', dots: 2 },
+  keigo: { en: 'Keigo', ja: '敬語', dots: 3 },
+}[level];
+---
+
+<span
+  class:list={[
+    'inline-flex items-center gap-1.5 rounded-full border-2 border-line bg-surface px-2.5 py-0.5 text-xs font-semibold',
+    className,
+  ]}
+  title={`Politeness: ${meta.en}`}
+>
+  <span class="inline-flex gap-0.5" aria-hidden="true">
+    {[1, 2, 3].map((n) => (
+      <span class:list={['h-2 w-2 rounded-full border-[1.5px] border-line', n <= meta.dots ? 'bg-ink' : 'bg-transparent']} />
+    ))}
+  </span>
+  <span class="sr-only">Politeness level:</span>
+  <span>{meta.en}</span>
+  <span lang="ja" class="!leading-none font-medium text-ink-soft">{meta.ja}</span>
+</span>

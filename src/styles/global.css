@@ -1,0 +1,666 @@
+@import 'tailwindcss';
+
+/* Dark mode is driven by data-theme on <html> (set before paint in Base.astro). */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ------------------------------------------------------------------
+   Design tokens — "Tokyo konbini pop"
+   Raw values live here as CSS variables so light/dark is a single swap.
+   Every text/fill pairing is checked by `npm run contrast`.
+   Rule: candy accents are FILLS only; text on them is always --on-accent.
+   Any element can force a theme with data-theme="light" | "dark"
+   (used by the /design page to show both side by side).
+   ------------------------------------------------------------------ */
+:root,
+[data-theme='light'] {
+  --paper: #fff8ec;
+  --surface: #ffffff;
+  --surface-2: #fff1d9; /* subtle tinted panel, still a "cream" for Japanese text */
+  --ink: #1e1b3a;
+  --ink-soft: #4a4568; /* secondary text */
+  --line: #1e1b3a; /* outlines */
+  --shadow: #1e1b3a; /* sticker shadow */
+  --primary: #5b3df5;
+  --on-primary: #ffffff;
+  --primary-soft: #ebe6ff;
+  --sakura: #ff8fb8;
+  --sunny: #ffd23f;
+  --matcha: #7ed9a0;
+  --ramune: #6ccbff;
+  --on-accent: #1e1b3a;
+  --success: #17703a;
+  --success-bg: #e3f6ea;
+  --error: #c92a3a;
+  --error-bg: #fde8ea;
+  --focus: #5b3df5;
+  --accent: var(--sunny);
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --paper: #15122b;
+  --surface: #221e45;
+  --surface-2: #2b2654;
+  --ink: #f7f3ff;
+  --ink-soft: #c9c2e8;
+  --line: #c4b8ff;
+  --shadow: #07051a;
+  --primary: #a594ff;
+  --on-primary: #15122b;
+  --primary-soft: #332c6b;
+  --sakura: #e88aae;
+  --sunny: #e9c24f;
+  --matcha: #72c493;
+  --ramune: #67b8e6;
+  --on-accent: #15122b;
+  --success: #7be3a3;
+  --success-bg: #1d3a32;
+  --error: #ff9aa5;
+  --error-bg: #45213a;
+  --focus: #ffd23f;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-sakura: var(--sakura);
+  --color-sunny: var(--sunny);
+  --color-matcha: var(--matcha);
+  --color-ramune: var(--ramune);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-error: var(--error);
+  --color-error-bg: var(--error-bg);
+
+  --font-display: 'Fredoka', 'Zen Maru Gothic', ui-rounded, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-ja: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif;
+  --font-ja-round: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif;
+
+  --radius-card: 16px;
+  --radius-btn: 12px;
+  --radius-badge: 999px;
+
+  --shadow-sticker: 4px 4px 0 var(--shadow);
+  --shadow-sticker-sm: 2px 2px 0 var(--shadow);
+  --shadow-none: 0 0 0 var(--shadow);
+
+  /* Japanese type scale (px values from the design brief) */
+  --text-ja-body: 1.1875rem; /* 19px */
+  --text-ja-dialogue: 1.375rem; /* 22px */
+  --text-ja-card: 3.25rem; /* 52px */
+}
+
+/* ------------------------------------------------------------------ Base */
+@layer base {
+  html {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    min-height: 100dvh;
+    background: var(--paper);
+    line-height: 1.6;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.005em;
+  }
+  /* Japanese text: comfortable size and line-height so ruby never collides */
+  :lang(ja) {
+    font-family: var(--font-ja);
+    line-height: 2;
+    font-feature-settings: 'palt' 0;
+  }
+  :is(h1, h2, h3, h4):lang(ja),
+  :is(h1, h2, h3, h4) :lang(ja) {
+    font-family: var(--font-ja-round);
+    line-height: 1.9;
+  }
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  ::selection {
+    background: var(--sunny);
+    color: var(--on-accent);
+  }
+}
+
+/* -------------------------------------------------------------- Furigana */
+ruby {
+  ruby-position: over;
+  ruby-align: center;
+}
+rt {
+  font-size: 0.5em;
+  font-family: var(--font-ja);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--ink-soft);
+  user-select: none;
+}
+:root[data-furigana='off'] rt {
+  display: none;
+}
+:root[data-english='off'] .en-translation {
+  display: none;
+}
+
+/* ------------------------------------------------------------ Components */
+@layer components {
+  .sticker-card {
+    background: var(--surface);
+    border: 2px solid var(--line);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-sticker);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0.625rem 1.25rem;
+    border: 2px solid var(--line);
+    border-radius: var(--radius-btn);
+    box-shadow: var(--shadow-sticker);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.0625rem;
+    line-height: 1.2;
+    cursor: pointer;
+    text-decoration: none;
+    transition:
+      transform 80ms ease-out,
+      box-shadow 80ms ease-out,
+      background-color 120ms;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 var(--shadow);
+  }
+  .btn:active,
+  .btn[aria-pressed='true'].btn-toggle {
+    transform: translate(4px, 4px);
+    box-shadow: var(--shadow-none);
+  }
+  .btn:disabled,
+  .btn[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+    box-shadow: var(--shadow-sticker-sm);
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .btn-accent {
+    background: var(--accent);
+    color: var(--accent-ink, var(--on-accent));
+  }
+  .btn-danger {
+    background: var(--error-bg);
+    color: var(--error);
+    border-color: var(--error);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: transparent;
+    box-shadow: none;
+  }
+  .btn-ghost:hover {
+    background: var(--surface-2);
+    box-shadow: none;
+    transform: none;
+  }
+  .btn-ghost.btn-sm,
+  .btn-ghost.btn-sm:hover,
+  .btn-ghost:active {
+    box-shadow: none;
+    transform: none;
+  }
+  .btn-sm {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.4rem 0.875rem;
+    font-size: 0.9375rem;
+    box-shadow: var(--shadow-sticker-sm);
+  }
+  .btn-sm:hover {
+    box-shadow: 3px 3px 0 var(--shadow);
+  }
+  .btn-sm:active {
+    transform: translate(2px, 2px);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.75rem;
+    border: 2px solid var(--line);
+    border-radius: var(--radius-badge);
+    background: var(--accent);
+    color: var(--accent-ink, var(--on-accent));
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  /* Highlighter swipe behind a section heading */
+  .swipe {
+    background-image: linear-gradient(
+      100deg,
+      transparent 0.2em,
+      var(--accent) 0.4em,
+      var(--accent) calc(100% - 0.4em),
+      transparent calc(100% - 0.2em)
+    );
+    background-repeat: no-repeat;
+    background-size: 100% 0.5em;
+    background-position: 0 88%;
+    padding-inline: 0.15em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  [data-theme='dark'] .swipe {
+    /* In dark mode the swipe sits under light text, so keep it subtle */
+    background-image: linear-gradient(
+      100deg,
+      transparent 0.2em,
+      color-mix(in srgb, var(--accent) 55%, transparent) 0.4em,
+      color-mix(in srgb, var(--accent) 55%, transparent) calc(100% - 0.4em),
+      transparent calc(100% - 0.2em)
+    );
+    background-size: 100% 0.35em;
+  }
+
+  /* "Add to flashcards" → "In your deck" (state shown by icon + text, not color alone) */
+  [data-add-card] .icon-added {
+    display: none;
+  }
+  [data-add-card][data-in-deck='true'] {
+    background: var(--success-bg);
+    color: var(--success);
+    border-color: var(--success);
+    box-shadow: none;
+    transform: none;
+    cursor: default;
+  }
+  [data-add-card][data-in-deck='true'] .icon-added {
+    display: inline;
+  }
+  [data-add-card][data-in-deck='true'] .icon-add {
+    display: none;
+  }
+
+  /* <details> toggles: an explicit arrow, since flex summaries lose the native marker */
+  details > summary {
+    list-style: none;
+  }
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+  details > summary::before {
+    content: '▸';
+    display: inline-block;
+    width: 1.1em;
+    transition: transform 120ms;
+  }
+  details[open] > summary::before {
+    transform: rotate(90deg);
+  }
+
+  /* Email builder: filled and empty fields inside the preview */
+  .email-field {
+    background: var(--primary-soft);
+    color: var(--ink);
+    border-bottom: 2px solid var(--primary);
+    border-radius: 4px;
+    padding: 0 2px;
+  }
+  .email-field-empty {
+    background: transparent;
+    color: var(--ink-soft);
+    border: 2px dashed var(--ink-soft);
+  }
+
+  /* Tappable vocabulary word inside Japanese text */
+  .vocab-word {
+    display: inline;
+    padding: 0 1px;
+    margin: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    line-height: inherit;
+    cursor: pointer;
+    text-decoration: underline dotted 2px;
+    text-decoration-color: var(--primary);
+    text-underline-offset: 6px;
+    border-radius: 4px;
+  }
+  .vocab-word:hover {
+    background: var(--primary-soft);
+  }
+
+  /* Rich text (rendered Markdown notes) */
+  .rich {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+  .rich > * + * {
+    margin-top: 0.85em;
+  }
+  .rich :lang(ja) {
+    font-size: 1.12em; /* Japanese reads small next to Latin at the same size */
+    line-height: 2;
+  }
+  .rich strong {
+    font-weight: 700;
+  }
+  .rich ul,
+  .rich ol {
+    padding-left: 1.4em;
+  }
+  .rich ul {
+    list-style: disc;
+  }
+  .rich ol {
+    list-style: decimal;
+  }
+  .rich li + li {
+    margin-top: 0.35em;
+  }
+  .rich blockquote {
+    border: 2px solid var(--line);
+    border-radius: var(--radius-btn);
+    background: var(--surface-2);
+    padding: 0.75rem 1rem;
+  }
+  .rich table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  .rich th,
+  .rich td {
+    border: 2px solid var(--line);
+    padding: 0.4rem 0.65rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  .rich th {
+    background: var(--surface-2);
+    font-weight: 600;
+  }
+  .rich code {
+    font-size: 0.9em;
+    padding: 0.05em 0.3em;
+    border-radius: 4px;
+    background: var(--surface-2);
+  }
+
+  /* Japanese text blocks */
+  .ja-body {
+    font-size: var(--text-ja-body);
+    line-height: 2;
+  }
+  .ja-dialogue {
+    font-size: var(--text-ja-dialogue);
+    line-height: 2.05;
+  }
+  .ja-card {
+    font-size: var(--text-ja-card);
+    line-height: 1.9;
+    font-weight: 500;
+  }
+
+  /* Category accents: set --accent on any element */
+  .cat-meetings {
+    --accent: var(--matcha);
+  }
+  .cat-phone {
+    --accent: var(--ramune);
+  }
+  .cat-email {
+    --accent: var(--sunny);
+  }
+  .cat-keigo {
+    --accent: var(--sakura);
+  }
+  /* JLPT level accents (see src/lib/levels.ts) */
+  .level-matcha {
+    --accent: var(--matcha);
+  }
+  .level-ramune {
+    --accent: var(--ramune);
+  }
+  .level-sunny {
+    --accent: var(--sunny);
+  }
+  .level-sakura {
+    --accent: var(--sakura);
+  }
+  .cat-primary {
+    /* Pale (light) / deep (dark) lavender: text on it is always --ink, never --on-accent */
+    --accent: var(--primary-soft);
+    --accent-ink: var(--ink);
+  }
+
+  /* Quiz option states. Color is never the only signal: each state also
+     gets an icon + text label in markup. */
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 56px;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--line);
+    border-radius: var(--radius-btn);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-sticker-sm);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      transform 80ms,
+      box-shadow 80ms;
+  }
+  .option:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--shadow);
+  }
+  .option[aria-checked='true'],
+  .option[data-state='selected'] {
+    background: var(--primary-soft);
+    border-width: 3px;
+  }
+  .option[data-state='correct'] {
+    background: var(--success-bg);
+    border-color: var(--success);
+    border-width: 3px;
+  }
+  .option[data-state='incorrect'] {
+    background: var(--error-bg);
+    border-color: var(--error);
+    border-width: 3px;
+  }
+  .option[data-state='dimmed'] {
+    /* 0.75 keeps ink and ink-soft text at or above 4.5:1 in both themes */
+    opacity: 0.75;
+    box-shadow: none;
+  }
+  .option:has(input:focus-visible) {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+  .option:has(input:disabled) {
+    cursor: default;
+    transform: none;
+  }
+  .option-key {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid var(--line);
+    border-radius: 999px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: var(--paper);
+  }
+}
+
+/* ------------------------------------------------------------ Flashcard flip */
+.flip-card {
+  perspective: 1200px;
+  width: 100%;
+  max-width: 26rem;
+}
+.flip-inner {
+  display: grid;
+  transition: transform 450ms cubic-bezier(0.3, 1.3, 0.5, 1);
+  transform-style: preserve-3d;
+}
+.flip-face {
+  grid-area: 1 / 1;
+  min-height: 18rem;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-back {
+  transform: rotateY(180deg);
+}
+.flip-card[data-flipped='true'] .flip-inner {
+  transform: rotateY(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .flip-inner {
+    transform: none !important;
+  }
+  .flip-back {
+    transform: none;
+    display: none !important;
+  }
+  .flip-card[data-flipped='true'] .flip-back {
+    display: flex !important;
+  }
+  .flip-card[data-flipped='true'] .flip-face:not(.flip-back) {
+    display: none !important;
+  }
+}
+
+/* ------------------------------------------------------------- Motion */
+@keyframes pop-bounce {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.06) translateY(-4px);
+  }
+  65% {
+    transform: scale(0.98);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes gentle-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+@keyframes confetti-fall {
+  0% {
+    transform: translate(0, 0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx, 0), var(--dy, 60px)) rotate(var(--rot, 180deg));
+    opacity: 0;
+  }
+}
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+.anim-bounce {
+  animation: pop-bounce 420ms cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.anim-shake {
+  animation: gentle-shake 380ms ease-in-out;
+}
+.anim-wiggle {
+  animation: wiggle 2.4s ease-in-out infinite;
+  transform-origin: 50% 90%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .confetti {
+    display: none !important;
+  }
+}

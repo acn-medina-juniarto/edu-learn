@@ -1,0 +1,27 @@
+---
+/** Jump links to #n5 … #n1 sections on a study page, with item counts. */
+import { LEVEL_IDS, levelClass, type Level } from '@/lib/levels';
+
+interface Props {
+  counts: Partial<Record<Level, number>>;
+  noun: string; // "points", "kanji", "readings"
+}
+const { counts, noun } = Astro.props;
+---
+
+<nav aria-label="Jump to JLPT level" class="mb-8">
+  <ul class="flex flex-wrap gap-2">
+    {
+      LEVEL_IDS.map((l) => (
+        <li>
+          <a href={`#${l.toLowerCase()}`} class:list={['btn btn-secondary btn-sm', levelClass(l)]}>
+            <span class="badge !px-2 !py-0 !text-xs">{l}</span>
+            <span class="text-sm font-medium text-ink-soft">
+              {counts[l] ?? 0} {noun}
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>

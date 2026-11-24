@@ -1,0 +1,139 @@
+---
+/**
+ * Sticky display toolbar: furigana / English toggles (saved as prefs) and an
+ * optional "Play dialogue" button that reads every [data-line-speech] in order.
+ */
+import Icon from '@/components/ui/Icon.astro';
+
+interface Props {
+  playAll?: boolean;
+  /** Render as a sticky bar under the header (lesson page) or inline (style guide) */
+  sticky?: boolean;
+  /** What "Play …" reads, e.g. "dialogue" or "text" */
+  playNoun?: string;
+}
+const { playAll = true, sticky = true, playNoun = 'dialogue' } = Astro.props;
+---
+
+<!-- When sticky it sits between <header> and <main>, so it is its own labelled region landmark -->
+<div
+  class:list={[
+    sticky && 'sticky top-0 z-30 border-b-2 border-line bg-paper/95 backdrop-blur-sm',
+  ]}
+  role={sticky ? 'region' : undefined}
+  aria-label={sticky ? 'Reading settings' : undefined}
+  data-lesson-toolbar
+>
+  <div class:list={['flex flex-wrap items-center gap-2', sticky ? 'mx-auto max-w-5xl px-4 py-2' : 'sticker-card inline-flex p-2']} role="toolbar" aria-label="Display options">
+    <!-- Short labels on phones so the bar stays one row; full labels from 640px -->
+    <button type="button" class="btn btn-secondary btn-sm btn-toggle" data-pref-toggle="furigana" aria-pressed="true">
+      <span lang="ja" class="!leading-none" aria-hidden="true">ふ</span> Furigana
+    </button>
+    <button type="button" class="btn btn-secondary btn-sm btn-toggle" data-pref-toggle="english" aria-pressed="true">
+      <Icon name="globe" /> <span class="sm:hidden" aria-hidden="true">EN</span><span class="sr-only sm:not-sr-only">English</span>
+    </button>
+    {
+      playAll && (
+        <button type="button" class="btn btn-secondary btn-sm" data-play-all aria-pressed="false">
+          <span data-play-label="play" class="inline-flex items-center gap-2">
+            <Icon name="speaker" /> Play<span class="sr-only sm:not-sr-only"> {playNoun}</span>
+          </span>
+          <span data-play-label="stop" class="hidden items-center gap-2">
+            <Icon name="x" /> Stop
+          </span>
+        </button>
+      )
+    }
+    <p class="sr-only" aria-live="polite" data-toolbar-status></p>
+  </div>
+</div>
+
+<style>
+  /* Toggles: pressed state shows a filled chip, not just a sunken button */
+  [data-pref-toggle] {
+    gap: 0.4rem;
+    padding-inline: 0.7rem;
+  }
+  [data-pref-toggle][aria-pressed='true'] {
+    background: var(--primary-soft);
+  }
+  [data-pref-toggle][aria-pressed='false'] {
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+  }
+  [data-play-all][aria-pressed='true'] [data-play-label='play'] {
+    display: none;
+  }
+  [data-play-all][aria-pressed='true'] [data-play-label='stop'] {
+    display: inline-flex;
+  }
+</style>
+
+<script>
+  import { readPrefs, writePrefs } from '@/lib/prefs';
+  import { hasJapaneseVoice, speakSequence, speechSupported, stopSpeaking } from '@/lib/speech';
+
+  const status = document.querySelector<HTMLElement>('[data-toolbar-status]');
+  const say = (msg: string) => {
+    if (status) status.textContent = msg;
+  };
+
+  // Furigana / English toggles
+  const toggles = document.querySelectorAll<HTMLButtonElement>('[data-pref-toggle]');
+  const sync = () => {
+    const p = readPrefs();
+    toggles.forEach((b) => {
+      const key = b.dataset.prefToggle as 'furigana' | 'english';
+      b.setAttribute('aria-pressed', String(p[key]));
+    });
+  };
+  toggles.forEach((b) =>
+    b.addEventListener('click', () => {
+      const key = b.dataset.prefToggle as 'furigana' | 'english';
+      const on = !readPrefs()[key];
+      writePrefs({ [key]: on });
+      sync();
+      say(`${key === 'furigana' ? 'Furigana' : 'English translation'} ${on ? 'shown' : 'hidden'}`);
+    }),
+  );
+  sync();
+
+  // Play the whole dialogue, highlighting the current line
+  const play = document.querySelector<HTMLButtonElement>('[data-play-all]');
+  const lines = () => [...document.querySelectorAll<HTMLElement>('[data-line-speech]')];
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const clearActive = () => lines().forEach((l) => l.removeAttribute('data-speaking'));
+  const stop = () => {
+    stopSpeaking();
+    clearActive();
+    play?.setAttribute('aria-pressed', 'false');
+  };
+
+  play?.addEventListener('click', () => {
+    if (play.getAttribute('aria-pressed') === 'true') return stop();
+    if (!speechSupported()) {
+      say('Audio is not supported in this browser.');
+      play.setAttribute('title', 'Audio is not supported in this browser');
+      return;
+    }
+    if (!hasJapaneseVoice()) say('No Japanese voice found. Audio may sound wrong. You can add one in your system settings.');
+    const els = lines();
+    play.setAttribute('aria-pressed', 'true');
+    speakSequence(
+      els.map((el) => el.dataset.lineSpeech ?? ''),
+      (i) => {
+        clearActive();
+        if (i < 0) {
+          play.setAttribute('aria-pressed', 'false');
+          return;
+        }
+        els[i].setAttribute('data-speaking', 'true');
+        els[i].scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' });
+      },
+    );
+  });
+
+  // Stop audio when leaving the page
+  window.addEventListener('pagehide', stop);
+</script>

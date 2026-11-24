@@ -1,0 +1,28 @@
+---
+/**
+ * Renders a Japanese string written in furigana markup ({漢字|かんじ}) as
+ * <ruby>, always with lang="ja". Optional `en` renders a toggleable translation.
+ */
+import { toRubyHtml } from '@/lib/furigana';
+
+interface Props {
+  text: string;
+  en?: string;
+  as?: 'p' | 'span' | 'div' | 'h1' | 'h2' | 'h3';
+  size?: 'body' | 'dialogue' | 'card' | 'inherit';
+  class?: string;
+}
+const { text, en, as: Tag = 'span', size = 'body', class: className } = Astro.props;
+const sizeClass = size === 'inherit' ? '' : `ja-${size}`;
+---
+
+{
+  en ? (
+    <div class={className}>
+      <Tag lang="ja" class={sizeClass} set:html={toRubyHtml(text)} />
+      <p class="en-translation mt-1 text-base leading-relaxed text-ink-soft">{en}</p>
+    </div>
+  ) : (
+    <Tag lang="ja" class:list={[sizeClass, className]} set:html={toRubyHtml(text)} />
+  )
+}

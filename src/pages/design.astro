@@ -1,0 +1,522 @@
+---
+/**
+ * /design — living style guide. Every real screen is built from what is shown here.
+ */
+import Base from '@/layouts/Base.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import Icon from '@/components/ui/Icon.astro';
+import ProgressBar from '@/components/ui/ProgressBar.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import StreakSticker from '@/components/ui/StreakSticker.astro';
+import Tanuki from '@/components/mascot/Tanuki.astro';
+import Ja from '@/components/ja/Ja.astro';
+import PolitenessTag from '@/components/ja/PolitenessTag.astro';
+import DialogueBubble from '@/components/lesson/DialogueBubble.astro';
+import FeedbackPanel from '@/components/quiz/FeedbackPanel.astro';
+import FlashcardFace from '@/components/flashcards/FlashcardFace.astro';
+import RatingBar from '@/components/flashcards/RatingBar.astro';
+import Sampler from '@/components/design/Sampler.astro';
+import LessonToolbar from '@/components/lesson/LessonToolbar.astro';
+import { CATEGORIES, CATEGORY_IDS } from '@/lib/categories';
+import { checkPairings, parseThemeTokens } from '@/lib/contrast';
+import css from '@/styles/global.css?raw';
+
+const tokens = parseThemeTokens(css);
+const pairs = checkPairings(tokens);
+
+const swatches = [
+  { token: 'paper', note: 'Page background' },
+  { token: 'surface', note: 'Cards' },
+  { token: 'surface-2', note: 'Tinted panels' },
+  { token: 'ink', note: 'Text + outlines' },
+  { token: 'ink-soft', note: 'Secondary text' },
+  { token: 'primary', note: 'Primary buttons' },
+  { token: 'sakura', note: 'Keigo · fill only' },
+  { token: 'sunny', note: 'Email · fill only' },
+  { token: 'matcha', note: 'Meetings · fill only' },
+  { token: 'ramune', note: 'Phone · fill only' },
+  { token: 'success', note: 'Success text' },
+  { token: 'error', note: 'Error text / icon' },
+];
+const catIcon = { meetings: 'book', phone: 'phone', email: 'mail', keigo: 'sparkle' } as const;
+const toc = [
+  ['colors', 'Colors'],
+  ['type', 'Typography'],
+  ['buttons', 'Buttons'],
+  ['badges', 'Badges & stickers'],
+  ['cards', 'Cards'],
+  ['furigana', 'Furigana & dialogue'],
+  ['quiz', 'Quiz states'],
+  ['flashcards', 'Flashcards'],
+  ['mascot', 'Mascot'],
+  ['themes', 'Light vs dark'],
+  ['contrast', 'Contrast report'],
+];
+---
+
+<Base title="Design system" description="Style guide for Biz Nihongo.">
+  <!-- Intro -->
+  <section class="mb-10 flex flex-col-reverse items-start gap-6 sm:flex-row sm:items-center">
+    <div class="flex-1">
+      <Badge category="primary">Style guide</Badge>
+      <h1 class="mt-3 text-4xl sm:text-5xl">Tokyo konbini pop</h1>
+      <p class="mt-3 max-w-prose text-lg text-ink-soft">
+        Warm cream paper, bold ink outlines, candy accents used as fills. Use the moon/sun button in the
+        header to check every section in dark mode.
+      </p>
+    </div>
+    <Tanuki pose="card" size={140} label="Pon-san the tanuki holding out a business card" />
+  </section>
+
+  <nav aria-label="Style guide sections" class="mb-10">
+    <ul class="flex flex-wrap gap-2">
+      {
+        toc.map(([id, label]) => (
+          <li>
+            <a href={`#${id}`} class="btn btn-secondary btn-sm">
+              {label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+
+  <!-- Colors -->
+  <section class="mb-14" aria-labelledby="colors">
+    <SectionHeading id="colors" category="email">Colors</SectionHeading>
+    <p class="mb-5 max-w-prose text-ink-soft">
+      Candy accents are <strong class="text-ink">fills only</strong>: text on them is always ink. Japanese body text
+      sits on white or cream, never on a saturated fill.
+    </p>
+    <ul class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      {
+        swatches.map((s) => (
+          <li class="sticker-card overflow-hidden">
+            <div class="h-16 border-b-2 border-line" style={`background: var(--${s.token})`} />
+            <div class="p-3 text-sm">
+              <p class="font-display text-base font-semibold">{s.token}</p>
+              <p class="font-mono text-xs text-ink-soft">
+                {tokens.light[s.token]} / {tokens.dark[s.token]}
+              </p>
+              <p class="mt-1 text-ink-soft">{s.note}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+    <h3 class="mt-8 mb-3 text-xl">Category accents</h3>
+    <div class="flex flex-wrap gap-3">
+      {
+        CATEGORY_IDS.map((id) => (
+          <Badge category={id}>
+            <Icon name={catIcon[id]} size={14} /> {CATEGORIES[id].label}{' '}
+            <span lang="ja" class="!leading-none">
+              {CATEGORIES[id].labelJa}
+            </span>
+          </Badge>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Typography -->
+  <section class="mb-14" aria-labelledby="type">
+    <SectionHeading id="type" category="meetings">Typography</SectionHeading>
+    <div class="grid gap-5 lg:grid-cols-2">
+      <Card>
+        <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-soft">Display · Fredoka</p>
+        <p class="font-display text-5xl font-semibold">Heading 1</p>
+        <p class="font-display text-3xl font-semibold">Heading 2</p>
+        <p class="font-display text-2xl font-semibold">Heading 3</p>
+        <p class="mt-4 mb-1 text-xs font-semibold uppercase tracking-wider text-ink-soft">Body · Inter 17px</p>
+        <p class="text-[17px] leading-relaxed">
+          Explanations and instructions are written in English, in short paragraphs that fit a 5-minute session.
+        </p>
+      </Card>
+      <Card>
+        <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-soft">
+          Japanese heading · Zen Maru Gothic
+        </p>
+        <h3 lang="ja" class="text-3xl">ビジネス日本語</h3>
+        <p class="mt-3 mb-1 text-xs font-semibold uppercase tracking-wider text-ink-soft">
+          Japanese body · Noto Sans JP 19px / 2.0
+        </p>
+        <Ja
+          as="p"
+          text="{本日|ほんじつ}はお{忙|いそが}しいところ、お{時間|じかん}をいただきありがとうございます。"
+        />
+        <p class="mt-3 mb-1 text-xs font-semibold uppercase tracking-wider text-ink-soft">
+          Dialogue · 22px / 2.05
+        </p>
+        <Ja as="p" size="dialogue" text="{確認|かくにん}いたします。" />
+        <p class="mt-3 mb-1 text-xs font-semibold uppercase tracking-wider text-ink-soft">Flashcard · 52px</p>
+        <Ja as="p" size="card" text="{名刺|めいし}" />
+      </Card>
+    </div>
+  </section>
+
+  <!-- Buttons -->
+  <section class="mb-14" aria-labelledby="buttons">
+    <SectionHeading id="buttons" category="keigo">Buttons</SectionHeading>
+    <p class="mb-5 max-w-prose text-ink-soft">
+      One primary action per screen. Buttons press down when clicked (the sticker shadow shrinks to 0). All tap
+      targets are at least 44px.
+    </p>
+    <div class="flex flex-wrap items-center gap-4">
+      <Button>Check answer</Button>
+      <Button variant="secondary">Skip</Button>
+      <Button variant="accent" class="cat-email">Start lesson <Icon name="arrow-right" /></Button>
+      <Button variant="ghost">Ghost</Button>
+      <Button disabled>Disabled</Button>
+    </div>
+    <div class="mt-5 flex flex-wrap items-center gap-3">
+      <Button size="sm">Small</Button>
+      <Button size="sm" variant="secondary"><Icon name="speaker" /> Listen</Button>
+      <Button size="sm" variant="secondary" aria-label="Play audio"><Icon name="speaker" /></Button>
+    </div>
+    <h3 class="mt-8 mb-3 text-xl">Lesson toolbar (live)</h3>
+    <p class="mb-3 text-sm text-ink-soft">The real component. On lesson pages it sticks under the header. "Play dialogue" reads the sample dialogue below.</p>
+    <LessonToolbar sticky={false} />
+  </section>
+
+  <!-- Badges & stickers -->
+  <section class="mb-14" aria-labelledby="badges">
+    <SectionHeading id="badges" category="phone">Badges &amp; stickers</SectionHeading>
+    <div class="flex flex-wrap items-center gap-3">
+      {['N5', 'N4', 'N3', 'N2', 'N1'].map((l) => <Badge category="primary">JLPT {l}</Badge>)}
+    </div>
+    <div class="mt-4 flex flex-wrap items-center gap-3">
+      <PolitenessTag level="casual" />
+      <PolitenessTag level="teinei" />
+      <PolitenessTag level="keigo" />
+    </div>
+    <div class="mt-6 flex flex-wrap items-center gap-6">
+      <StreakSticker days={5} />
+      <StreakSticker days={0} returning />
+    </div>
+  </section>
+
+  <!-- Cards -->
+  <section class="mb-14" aria-labelledby="cards">
+    <SectionHeading id="cards" category="email">Cards</SectionHeading>
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        CATEGORY_IDS.map((id, i) => (
+          <Card category={id} strip as="article">
+            <Badge category={id}>
+              <Icon name={catIcon[id]} size={14} /> {CATEGORIES[id].label}
+            </Badge>
+            <h3 class="mt-3 text-xl">Lesson {i + 1}</h3>
+            <Ja as="p" text={['{自己紹介|じこしょうかい}', '{電話|でんわ}の{応対|おうたい}', 'メールの{基本|きほん}', 'お{願|ねが}いの{仕方|しかた}'][i]} />
+            <ProgressBar value={[10, 6, 3, 0][i]} max={10} label="Progress" category={id} class="mt-3" />
+          </Card>
+        ))
+      }
+    </div>
+
+    <h3 class="mt-8 mb-3 text-xl">Continue-learning card</h3>
+    <div class="sticker-card cat-phone flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
+      <Tanuki pose="wave" size={88} />
+      <div class="flex-1">
+        <p class="text-sm font-semibold text-ink-soft">Continue where you left off</p>
+        <p class="font-display text-2xl font-semibold">Phone etiquette</p>
+        <Ja as="p" text="{電話|でんわ}の{応対|おうたい}" class="text-ink-soft" />
+      </div>
+      <Button>Continue <Icon name="arrow-right" /></Button>
+    </div>
+
+    <h3 class="mt-8 mb-3 text-xl">Empty state</h3>
+    <div class="sticker-card flex flex-col items-center gap-2 p-8 text-center">
+      <Tanuki pose="sleepy" size={110} />
+      <p class="font-display text-2xl font-semibold">No cards due today</p>
+      <p class="max-w-sm text-ink-soft">Pon-san is taking a nap. Come back tomorrow, or start a new lesson.</p>
+      <Button variant="secondary" class="mt-2">Browse lessons</Button>
+    </div>
+  </section>
+
+  <!-- Furigana & dialogue -->
+  <section class="mb-14" aria-labelledby="furigana">
+    <SectionHeading id="furigana" category="meetings">Furigana &amp; dialogue</SectionHeading>
+    <p class="mb-5 max-w-prose text-ink-soft">
+      Use the toolbar toggles above to hide furigana or English. Line-height ≥ 1.9 keeps ruby clear of the line
+      above. Underlined words are tappable (the popup is built in Phase 3).
+    </p>
+    <Card class="mb-6">
+      <Ja
+        as="p"
+        en="I'm Smith from ABC Trading. Here is my business card. I look forward to working with you."
+        text="ABC{商事|しょうじ}のスミスと{申|もう}します。こちら、わたくしの{名刺|めいし|meishi}でございます。どうぞよろしくお{願|ねが}いいたします。"
+      />
+    </Card>
+    <div class="flex flex-col gap-5">
+      <DialogueBubble
+        speakerName="Tanaka"
+        speakerRole="Client"
+        accent="matcha"
+        politeness="keigo"
+        ja="お{待|ま}たせいたしました。{営業部|えいぎょうぶ}の{田中|たなか}でございます。"
+        en="Sorry to keep you waiting. I'm Tanaka from the sales department."
+      />
+      <DialogueBubble
+        speakerName="Smith"
+        speakerRole="You"
+        side="right"
+        accent="ramune"
+        politeness="keigo"
+        ja="はじめまして。ABC{商事|しょうじ}のスミスと{申|もう}します。"
+        en="How do you do. I'm Smith from ABC Trading."
+        note="{申|もう}す is the humble (謙譲語) form of {言|い}う."
+      />
+    </div>
+
+    <h3 class="mt-8 mb-3 text-xl">Word popup</h3>
+    <div class="sticker-card inline-block max-w-xs p-4" role="dialog" aria-label="名刺 meaning">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <Ja as="p" text="{名刺|めいし}" class="text-3xl" />
+          <p class="font-display text-lg font-semibold">business card</p>
+          <p class="text-sm text-ink-soft">noun</p>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" data-speak="名刺" aria-label="Play audio: 名刺">
+          <Icon name="speaker" />
+        </button>
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm mt-2 w-full"><Icon name="cards" /> Add to flashcards</button>
+    </div>
+  </section>
+
+  <!-- Quiz -->
+  <section class="mb-14" aria-labelledby="quiz">
+    <SectionHeading id="quiz" category="keigo">Quiz states</SectionHeading>
+    <div class="grid gap-6 lg:grid-cols-2">
+      <div>
+        <ProgressBar value={3} max={8} label="Question 3 of 8" category="primary" showValue={false} class="mb-4" />
+        <p class="mb-1 text-sm font-semibold text-ink-soft">Multiple choice</p>
+        <p class="mb-4 text-lg font-medium">A client asks you to check a document. How do you reply?</p>
+        <div class="grid gap-3" id="demo-options">
+          <div class="option" data-state="default">
+            <span class="option-key">A</span><span lang="ja" class="flex-1 text-lg">わかった。</span>
+            <span class="text-sm text-ink-soft">Default</span>
+          </div>
+          <div class="option" data-state="selected">
+            <span class="option-key">B</span><span lang="ja" class="flex-1 text-lg">わかりました。</span>
+            <span class="text-sm font-semibold">Selected</span>
+          </div>
+          <div class="option" data-state="correct">
+            <span class="option-key text-success"><Icon name="check" size={16} /></span>
+            <span lang="ja" class="flex-1 text-lg">かしこまりました。</span>
+            <span class="text-sm font-semibold text-success">Correct</span>
+          </div>
+          <div class="option" data-state="incorrect">
+            <span class="option-key text-error"><Icon name="x" size={16} /></span>
+            <span lang="ja" class="flex-1 text-lg">オッケーです。</span>
+            <span class="text-sm font-semibold text-error">Your answer</span>
+          </div>
+          <div class="option" data-state="dimmed">
+            <span class="option-key">E</span><span lang="ja" class="flex-1 text-lg">はい、はい。</span>
+            <span class="text-sm text-ink-soft">Dimmed</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-4">
+        <FeedbackPanel
+          kind="correct"
+          heading="Correct! Nicely done."
+          explanation="かしこまりました is the humble way to say “understood” to a client or senior."
+        />
+        <FeedbackPanel
+          kind="incorrect"
+          heading="Close!"
+          explanation="オッケーです is friendly but too casual here. In business settings we say:"
+          answerJa="かしこまりました。"
+        />
+        <p class="mb-0 text-sm font-semibold text-ink-soft">Try the feedback animations</p>
+        <div class="flex flex-wrap gap-3">
+          <button type="button" class="btn btn-secondary btn-sm" id="demo-correct">
+            <Icon name="check" /> Play correct
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" id="demo-wrong"><Icon name="x" /> Play wrong</button>
+        </div>
+        <div class="sticker-card p-4" id="demo-target">
+          <p class="font-display text-lg font-semibold">Answer card</p>
+          <p class="text-sm text-ink-soft">Bounces + confetti when correct, gently shakes when wrong. Both are off with reduced motion.</p>
+        </div>
+        <div>
+          <p class="mb-2 text-sm font-semibold text-ink-soft">Fill-in-the-blank</p>
+          <div class="sticker-card p-4">
+            <Ja as="p" text="{資料|しりょう}をご{確認|かくにん}" class="inline" />
+            <label class="sr-only" for="demo-blank">Your answer</label>
+            <input
+              id="demo-blank"
+              lang="ja"
+              class="mx-1 inline-block min-h-11 w-40 rounded-[12px] border-2 border-line bg-paper px-3 text-lg"
+              placeholder="ください"
+            />
+            <span lang="ja" class="ja-body">。</span>
+          </div>
+        </div>
+        <div>
+          <p class="mb-2 text-sm font-semibold text-ink-soft">Sentence ordering</p>
+          <div class="sticker-card flex flex-wrap gap-2 p-4">
+            {['{本日|ほんじつ}は', 'お{時間|じかん}を', 'いただき', 'ありがとうございます'].map((t) => (
+              <button type="button" class="btn btn-secondary btn-sm !font-sans">
+                <Ja text={t} size="inherit" class="text-lg font-medium" />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 flex justify-end">
+      <Button>Check answer</Button>
+    </div>
+  </section>
+
+  <!-- Flashcards -->
+  <section class="mb-14" aria-labelledby="flashcards">
+    <SectionHeading id="flashcards" category="phone">Flashcards</SectionHeading>
+    <div class="grid gap-8 md:grid-cols-2">
+      <div>
+        <p class="mb-2 text-sm font-semibold text-ink-soft">Front</p>
+        <FlashcardFace word="{名刺|めいし}" meaning="business card" pos="noun" />
+      </div>
+      <div>
+        <p class="mb-2 text-sm font-semibold text-ink-soft">Back</p>
+        <FlashcardFace
+          word="{名刺|めいし}"
+          meaning="business card"
+          pos="noun"
+          exampleJa="{名刺|めいし}を{頂戴|ちょうだい}いたします。"
+          exampleEn="Thank you for your card."
+          flipped
+        />
+      </div>
+    </div>
+    <div class="mt-8">
+      <p class="mb-2 text-sm font-semibold text-ink-soft">Live flip (click the card or the Flip button)</p>
+      <div class="grid max-w-md gap-4">
+        <!-- No role="button" here: the card contains its own buttons, so a separate Flip button is the keyboard control -->
+        <div id="demo-flip-wrap" class="rounded-[16px]">
+          <FlashcardFace
+            id="demo-flip"
+            word="{承知|しょうち}いたしました"
+            meaning="Understood. (humble)"
+            pos="expression"
+            category="email"
+            exampleJa="ご{依頼|いらい}の{件|けん}、{承知|しょうち}いたしました。"
+            exampleEn="I have understood your request."
+          />
+        </div>
+        <button type="button" class="btn btn-primary" id="demo-flip-btn" aria-controls="demo-flip">Flip card</button>
+        <RatingBar />
+      </div>
+    </div>
+  </section>
+
+  <!-- Mascot -->
+  <section class="mb-14" aria-labelledby="mascot">
+    <SectionHeading id="mascot" category="keigo">Mascot · Pon-san</SectionHeading>
+    <p class="mb-5 max-w-prose text-ink-soft">
+      An original tanuki in a suit. Appears on home, empty states, and lesson complete. Never more than one per
+      screen.
+    </p>
+    <ul class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      {
+        (['wave', 'card', 'cheer', 'sleepy'] as const).map((p) => (
+          <li class="sticker-card flex flex-col items-center gap-2 p-4">
+            <Tanuki pose={p} size={110} />
+            <p class="font-display font-semibold capitalize">{p}</p>
+            <p class="text-center text-xs text-ink-soft">
+              {{ wave: 'Home', card: 'Meeting lessons', cheer: 'Lesson complete', sleepy: 'Empty states' }[p]}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- Themes side by side -->
+  <section class="mb-14" aria-labelledby="themes">
+    <SectionHeading id="themes" category="primary">Light vs dark</SectionHeading>
+    <div class="grid gap-5 md:grid-cols-2">
+      <Sampler theme="light" />
+      <Sampler theme="dark" />
+    </div>
+  </section>
+
+  <!-- Contrast -->
+  <section class="mb-6" aria-labelledby="contrast">
+    <SectionHeading id="contrast" category="meetings">Contrast report</SectionHeading>
+    <p class="mb-4 text-ink-soft">
+      {pairs.filter((p) => p.pass).length} of {pairs.length} pairings pass WCAG AA. Generated from the tokens in
+      <code>global.css</code> at build time (same check as <code>npm run contrast</code>).
+    </p>
+    <div class="sticker-card overflow-x-auto" tabindex="0" role="region" aria-label="Contrast report table (scrolls sideways)">
+      <table class="w-full min-w-[34rem] text-left text-sm">
+        <caption class="sr-only">Color contrast ratios</caption>
+        <thead class="border-b-2 border-line bg-surface-2">
+          <tr>
+            <th scope="col" class="p-3">Theme</th>
+            <th scope="col" class="p-3">Pairing</th>
+            <th scope="col" class="p-3">Used for</th>
+            <th scope="col" class="p-3 text-right">Ratio</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            pairs.map((p) => (
+              <tr class="border-b border-line/20 last:border-0">
+                <td class="p-3 capitalize">{p.theme}</td>
+                <td class="p-3">
+                  <span
+                    class="mr-2 inline-block rounded-md border-2 border-line px-2 py-0.5 font-semibold"
+                    style={`color:${p.fgHex};background:${p.bgHex}`}
+                  >
+                    Aa
+                  </span>
+                  {p.fg} on {p.bg}
+                </td>
+                <td class="p-3 text-ink-soft">{p.use}</td>
+                <td class="p-3 text-right tabular-nums">
+                  <span class:list={['inline-flex items-center gap-1 font-semibold', p.pass ? 'text-success' : 'text-error']}>
+                    <Icon name={p.pass ? 'check' : 'x'} size={16} />
+                    {p.ratio.toFixed(2)}:1
+                  </span>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { confettiBurst, replayAnimation } from '@/lib/confetti';
+  // Toolbar toggles + audio buttons are handled by LessonToolbar and the global speak handler.
+
+  // Feedback animations
+  const target = document.getElementById('demo-target')!;
+  document.getElementById('demo-correct')?.addEventListener('click', (e) => {
+    replayAnimation(target, 'anim-bounce');
+    confettiBurst(e.currentTarget as HTMLElement);
+  });
+  document.getElementById('demo-wrong')?.addEventListener('click', () => replayAnimation(target, 'anim-shake'));
+
+  // Flashcard flip
+  const wrap = document.getElementById('demo-flip-wrap');
+  const card = document.getElementById('demo-flip');
+  const flip = () => {
+    if (!card) return;
+    card.dataset.flipped = card.dataset.flipped === 'true' ? 'false' : 'true';
+  };
+  wrap?.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    flip();
+  });
+  document.getElementById('demo-flip-btn')?.addEventListener('click', flip);
+</script>

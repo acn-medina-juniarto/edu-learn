@@ -1,0 +1,240 @@
+---
+import '@fontsource/fredoka/500.css';
+import '@fontsource/fredoka/600.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/noto-sans-jp/400.css';
+import '@fontsource/noto-sans-jp/500.css';
+import '@fontsource/noto-sans-jp/700.css';
+import '@fontsource/zen-maru-gothic/500.css';
+import '@fontsource/zen-maru-gothic/700.css';
+import '@/styles/global.css';
+import ThemeToggle from '@/components/ThemeToggle.astro';
+import { PREFS_KEY } from '@/lib/prefs';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = 'Free business Japanese lessons for English speakers.' } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const fullTitle = title === 'Biz Nihongo' ? title : `${title} · Biz Nihongo`;
+const current = Astro.url.pathname;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const nav = [
+  { id: 'lessons', label: 'Lessons', href: `${base}/lessons`, match: `${base}/lessons` },
+  { id: 'study', label: 'Study', href: `${base}/study`, match: [`${base}/study`, `${base}/grammar`, `${base}/kanji`, `${base}/reading`] },
+  { id: 'flashcards', label: 'Cards', href: `${base}/flashcards`, match: `${base}/flashcards` },
+  { id: 'keigo', label: 'Keigo', href: `${base}/keigo`, match: `${base}/keigo` },
+  { id: 'email', label: 'Email', href: `${base}/email`, match: `${base}/email` },
+  { id: 'progress', label: 'Progress', href: `${base}/progress`, match: `${base}/progress` },
+];
+---
+
+<!doctype html>
+<html lang="en" data-furigana="on" data-english="on">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#FFF8EC" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#15122B" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Biz Nihongo" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <title>{fullTitle}</title>
+    <!-- Apply saved prefs before paint so there is no theme flash -->
+    <script is:inline define:vars={{ key: PREFS_KEY }}>
+      (function () {
+        var p = {};
+        try {
+          p = JSON.parse(localStorage.getItem(key) || '{}') || {};
+        } catch (e) {}
+        var r = document.documentElement;
+        var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        r.dataset.theme = p.theme || (dark ? 'dark' : 'light');
+        r.dataset.furigana = p.furigana === false ? 'off' : 'on';
+        r.dataset.english = p.english === false ? 'off' : 'on';
+      })();
+    </script>
+  </head>
+  <body class="antialiased">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 btn btn-secondary btn-sm"
+      >Skip to content</a
+    >
+    <header class="border-b-2 border-line bg-surface">
+      <!-- Phones: logo + theme on row 1, nav on row 2. From 768px: one row. -->
+      <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-2">
+        <a href={`${base}/`} class="flex min-h-11 items-center gap-2 rounded-lg no-underline">
+          <span
+            class="cat-email badge !px-2 !text-base"
+            lang="ja"
+            aria-hidden="true">ビジ</span
+          >
+          <span class="font-display text-xl font-semibold">Biz Nihongo</span>
+        </a>
+        <div class="contents md:flex md:items-center md:gap-2">
+          <nav aria-label="Main" class="nav-scroll order-last -mx-2 w-[calc(100%+1rem)] overflow-x-auto md:order-none md:mx-0 md:w-auto md:overflow-visible">
+            <ul class="flex min-w-max items-center justify-between md:justify-start md:gap-2">
+              {
+                nav.map((item) => (
+                  <li>
+                    <a
+                      href={item.href}
+                      class="nav-link"
+                      aria-current={[item.match].flat().some((m) => current.startsWith(m)) ? 'page' : undefined}
+                    >
+                      {item.label}
+                      {item.id === 'flashcards' && (
+                        <span class="due-badge" data-due-badge hidden>
+                          <span data-due-count />
+                          <span class="sr-only"> cards due</span>
+                        </span>
+                      )}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+          <ThemeToggle />
+        </div>
+      </div>
+    </header>
+    <slot name="toolbar" />
+    <main id="main" class="mx-auto max-w-5xl px-4 py-8">
+      <slot />
+    </main>
+    <footer class="mt-8 border-t-2 border-line bg-surface">
+      <div class="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-6 text-sm text-ink-soft sm:flex-row sm:items-start sm:justify-between">
+        <div class="max-w-prose">
+          <p class="font-display text-base font-semibold text-ink">Biz Nihongo</p>
+          <p>
+            Free business Japanese for English speakers. No account, no ads, no tracking: your progress stays in this
+            browser.
+          </p>
+          <p class="mt-1">All content is original and is being checked by a native speaker.</p>
+        </div>
+        <nav aria-label="Footer">
+          <ul class="flex flex-wrap gap-x-1 sm:justify-end">
+            {
+              [
+                ['Progress & backup', `${base}/progress`],
+                ['Content review', `${base}/review`],
+                ['Style guide', `${base}/design`],
+              ].map(([label, href]) => (
+                <li>
+                  <a href={href} class="inline-flex min-h-11 items-center px-2 font-semibold text-ink underline-offset-4 hover:underline">
+                    {label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </footer>
+    <script>
+      import '@/scripts/speak-buttons';
+      import '@/scripts/deck-buttons';
+      import { DECK_EVENT, readDeck, today } from '@/lib/deck';
+      import { buildQueue } from '@/lib/srs';
+
+      // Cards-due badge in the header
+      function updateDue() {
+        const n = buildQueue(readDeck().cards, today()).length;
+        document.querySelectorAll<HTMLElement>('[data-due-badge]').forEach((b) => {
+          b.hidden = n === 0;
+          const c = b.querySelector('[data-due-count]');
+          if (c) c.textContent = String(n);
+        });
+      }
+      updateDue();
+      document.addEventListener(DECK_EVENT, updateDue);
+
+      // Nav scroll hint: drop the fade once scrolled to the end (or when it all fits)
+      const navEl = document.querySelector<HTMLElement>('.nav-scroll');
+      const syncNav = () => {
+        if (!navEl) return;
+        const end = navEl.scrollLeft + navEl.clientWidth >= navEl.scrollWidth - 2;
+        navEl.dataset.scrolledEnd = String(end);
+      };
+      navEl?.addEventListener('scroll', syncNav, { passive: true });
+      window.addEventListener('resize', syncNav);
+      syncNav();
+      // Keep the current page's link visible
+      navEl?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    </script>
+
+    <style>
+      .nav-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        min-height: 44px;
+        padding: 0 0.3rem;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        border: 2px solid transparent;
+        border-radius: 12px;
+        font-family: var(--font-display);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      @media (min-width: 768px) {
+        .nav-link {
+          padding: 0 0.7rem;
+          font-size: 1rem;
+        }
+      }
+      .nav-link:hover {
+        background: var(--surface-2);
+      }
+      .nav-link[aria-current='page'] {
+        border-color: var(--line);
+        background: var(--primary-soft);
+      }
+      /* On very narrow phones the nav scrolls sideways instead of widening the page */
+      .nav-scroll {
+        scrollbar-width: none;
+      }
+      /* Fade at the right edge hints that the row scrolls (phones only) */
+      @media (max-width: 767px) {
+        .nav-scroll {
+          mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+          padding-right: 24px;
+        }
+        .nav-scroll[data-scrolled-end='true'] {
+          mask-image: none;
+        }
+      }
+      .nav-scroll::-webkit-scrollbar {
+        display: none;
+      }
+      .due-badge {
+        display: inline-grid;
+        place-items: center;
+        min-width: 1.5rem;
+        height: 1.5rem;
+        padding: 0 0.35rem;
+        border: 2px solid var(--line);
+        border-radius: 999px;
+        background: var(--sakura);
+        color: var(--on-accent);
+        font-size: 0.8rem;
+        line-height: 1;
+      }
+      .due-badge[hidden] {
+        display: none;
+      }
+    </style>
+  </body>
+</html>

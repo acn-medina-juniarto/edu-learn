@@ -1,0 +1,14 @@
+---
+import { LEVELS, levelClass, type Level } from '@/lib/levels';
+
+interface Props {
+  level: Level;
+  showName?: boolean;
+  class?: string;
+}
+const { level, showName = false, class: className } = Astro.props;
+---
+
+<span class:list={['badge', levelClass(level), className]}>
+  JLPT {level}{showName && <span class="font-medium">· {LEVELS[level].name}</span>}
+</span>

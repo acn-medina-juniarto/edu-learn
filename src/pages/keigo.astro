@@ -1,0 +1,284 @@
+---
+/**
+ * /keigo: searchable 尊敬語 / 謙譲語 / 丁寧語 reference.
+ * Static table (works without JS); a small script filters rows as you type.
+ * Below 768px the table becomes stacked cards with labelled cells.
+ */
+import Base from '@/layouts/Base.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Icon from '@/components/ui/Icon.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import Ja from '@/components/ja/Ja.astro';
+import Mixed from '@/components/ja/Mixed.astro';
+import NoteBlock from '@/components/lesson/NoteBlock.astro';
+import LessonToolbar from '@/components/lesson/LessonToolbar.astro';
+import { getKeigo } from '@/lib/content';
+import { toPlain } from '@/lib/furigana';
+import { searchIndex } from '@/lib/search';
+
+const keigo = await getKeigo();
+const rows = keigo.entries.map((e) => ({
+  e,
+  index: searchIndex([e.plain, e.meaning, e.teineigo, ...e.sonkeigo, ...e.kenjougo, e.notes]),
+}));
+const cols = [
+  { key: 'sonkeigo', en: 'Honorific', ja: '尊敬語', hint: 'raise them' },
+  { key: 'kenjougo', en: 'Humble', ja: '謙譲語', hint: 'lower yourself' },
+] as const;
+---
+
+<Base title="Keigo reference" description="Searchable table of honorific, humble and polite verb forms.">
+  <LessonToolbar slot="toolbar" playAll={false} />
+
+  <div class="cat-keigo mb-8">
+    <SectionHeading level={1} category="keigo">Keigo reference</SectionHeading>
+    <p class="max-w-prose text-ink-soft">
+      Common business verbs in <span lang="ja">尊敬語</span> (honorific: for the other person), <span lang="ja"
+        >謙譲語</span
+      > (humble: for yourself and your company) and <span lang="ja">丁寧語</span> (polite <span lang="ja"
+        >です・ます</span
+      >).
+    </p>
+    {
+      !keigo.reviewed && (
+        <p class="mt-2 text-sm text-ink-soft">
+          <Icon name="info" size={16} class="mr-1 inline align-[-3px]" />
+          Draft content: awaiting native-speaker review.
+        </p>
+      )
+    }
+  </div>
+
+  <!-- Search -->
+  <div class="sticker-card mb-6 p-4" role="search">
+    <label for="keigo-search" class="mb-2 block font-display text-lg font-semibold">Search</label>
+    <div class="flex flex-wrap gap-2">
+      <input
+        id="keigo-search"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="言う, いう, say, 伺う…"
+        aria-describedby="keigo-search-hint keigo-count"
+        class="min-h-12 min-w-0 flex-1 rounded-[12px] border-2 border-line bg-paper px-4 text-lg"
+      />
+      <button type="button" class="btn btn-secondary btn-sm" id="keigo-clear" hidden>Clear</button>
+    </div>
+    <p id="keigo-search-hint" class="mt-2 text-sm text-ink-soft">
+      Search in kanji, kana or English. Press <kbd class="rounded border border-line px-1">/</kbd> to jump here.
+    </p>
+    <p id="keigo-count" class="mt-1 text-sm font-semibold" aria-live="polite">
+      Showing {rows.length} of {rows.length} verbs
+    </p>
+  </div>
+
+  <!-- Table -->
+  <div class="keigo-wrap sticker-card mb-4 overflow-hidden">
+    <table class="keigo-table w-full text-left">
+      <caption class="sr-only">Keigo forms of common verbs</caption>
+      <thead class="border-b-2 border-line bg-surface-2">
+        <tr>
+          <th scope="col" class="p-3">Plain form</th>
+          {
+            cols.map((c) => (
+              <th scope="col" class="p-3">
+                {c.en} <span lang="ja">{c.ja}</span>
+                <span class="block text-xs font-medium text-ink-soft">{c.hint}</span>
+              </th>
+            ))
+          }
+          <th scope="col" class="p-3">
+            Polite <span lang="ja">丁寧語</span>
+            <span class="block text-xs font-medium text-ink-soft" lang="ja">です・ます</span>
+          </th>
+        </tr>
+      </thead>
+      {
+        rows.map(({ e, index }) => (
+          <tbody data-keigo-entry data-search={index} id={`keigo-${e.id}`}>
+            <tr>
+              <th scope="row" class="p-3 align-top" data-label="Plain">
+                <Ja text={e.plain} class="text-xl font-medium" size="inherit" />
+                <Mixed text={e.meaning} class="block text-sm font-normal text-ink-soft" />
+              </th>
+              {cols.map((c) => (
+                <td class="p-3 align-top" data-label={`${c.en} ${c.ja}`}>
+                  {e[c.key].length ? (
+                    <ul class="grid gap-0.5">
+                      {e[c.key].map((f) => (
+                        <li>
+                          <Ja text={f} class="text-lg" size="inherit" />
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span class="text-ink-soft">
+                      <span aria-hidden="true">—</span>
+                      <span class="sr-only">No special form</span>
+                    </span>
+                  )}
+                </td>
+              ))}
+              <td class="p-3 align-top" data-label="Polite 丁寧語">
+                <Ja text={e.teineigo} class="text-lg" size="inherit" />
+              </td>
+            </tr>
+            {(e.examples.length > 0 || e.notes) && (
+              <tr class="keigo-extra">
+                <td colspan="4" class="px-3 pb-3">
+                  <details class="rounded-[12px] border-2 border-line bg-surface-2">
+                    <summary class="flex min-h-11 cursor-pointer items-center px-3 text-sm font-semibold">
+                      Examples &amp; notes
+                    </summary>
+                    <div class="grid gap-2 px-3 pb-3">
+                      {e.examples.map((x) => (
+                        <div class="flex items-start gap-2">
+                          <div class="min-w-0 flex-1">
+                            <Ja text={x.ja} en={x.en} />
+                          </div>
+                          <button
+                            type="button"
+                            class="btn btn-ghost btn-sm flex-none !px-2"
+                            data-speak={toPlain(x.ja)}
+                            aria-label={`Play: ${toPlain(x.ja)}`}
+                          >
+                            <Icon name="speaker" />
+                          </button>
+                        </div>
+                      ))}
+                      {e.notes && (
+                        <p class="text-sm leading-relaxed">
+                          <Icon name="info" size={16} class="mr-1 inline align-[-3px]" />
+                          <Mixed text={e.notes} />
+                        </p>
+                      )}
+                    </div>
+                  </details>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        ))
+      }
+    </table>
+  </div>
+  <div class="sticker-card mb-10 hidden p-6 text-center" id="keigo-empty">
+    <p class="font-display text-xl font-semibold">No verbs match that search</p>
+    <p class="text-ink-soft">Try the plain form (e.g. <span lang="ja">見る</span>) or an English word.</p>
+  </div>
+
+  <!-- Notes -->
+  <section class="mt-10" aria-labelledby="keigo-notes-h">
+    <SectionHeading id="keigo-notes-h" category="keigo">How keigo works</SectionHeading>
+    <div class="grid gap-5">
+      {keigo.notes.map((n) => <NoteBlock note={n} />)}
+    </div>
+  </section>
+  <p class="mt-6 text-sm text-ink-soft">
+    <Badge category="primary">Tip</Badge> Turn furigana off in the toolbar to test yourself.
+  </p>
+</Base>
+
+<style>
+  .keigo-table tbody + tbody {
+    border-top: 2px solid color-mix(in srgb, var(--line) 25%, transparent);
+  }
+  .keigo-table tbody[hidden] {
+    display: none;
+  }
+  @media (max-width: 767px) {
+    .keigo-wrap {
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      overflow: visible;
+    }
+    .keigo-table,
+    .keigo-table tbody,
+    .keigo-table tr,
+    .keigo-table th,
+    .keigo-table td {
+      display: block;
+    }
+    .keigo-table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+    .keigo-table tbody {
+      margin-bottom: 1rem;
+      border: 2px solid var(--line) !important;
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: 4px 4px 0 var(--shadow);
+    }
+    .keigo-table tbody[hidden] {
+      display: none;
+    }
+    .keigo-table td[data-label]::before {
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 0.15rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+    }
+    .keigo-table td {
+      padding-top: 0.4rem;
+      padding-bottom: 0.4rem;
+    }
+  }
+</style>
+
+<script>
+  import { matches } from '@/lib/search';
+
+  const input = document.getElementById('keigo-search') as HTMLInputElement;
+  const clear = document.getElementById('keigo-clear') as HTMLButtonElement;
+  const count = document.getElementById('keigo-count')!;
+  const empty = document.getElementById('keigo-empty')!;
+  const entries = [...document.querySelectorAll<HTMLElement>('[data-keigo-entry]')];
+
+  function apply() {
+    const q = input.value;
+    let shown = 0;
+    for (const el of entries) {
+      const ok = matches(el.dataset.search ?? '', q);
+      el.hidden = !ok;
+      if (ok) shown++;
+    }
+    count.textContent = `Showing ${shown} of ${entries.length} verbs`;
+    empty.classList.toggle('hidden', shown > 0);
+    clear.hidden = !q;
+  }
+
+  let t: number | undefined;
+  input.addEventListener('input', () => {
+    window.clearTimeout(t);
+    t = window.setTimeout(apply, 80);
+  });
+  clear.addEventListener('click', () => {
+    input.value = '';
+    apply();
+    input.focus();
+  });
+  document.addEventListener('keydown', (e) => {
+    const target = e.target as HTMLElement;
+    if (e.key === '/' && !target.closest('input, textarea')) {
+      e.preventDefault();
+      input.focus();
+    }
+    if (e.key === 'Escape' && target === input && input.value) {
+      input.value = '';
+      apply();
+    }
+  });
+  // Support ?q= links
+  const q = new URLSearchParams(location.search).get('q');
+  if (q) {
+    input.value = q;
+    apply();
+  }
+</script>

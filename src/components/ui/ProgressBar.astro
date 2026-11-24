@@ -1,0 +1,31 @@
+---
+import type { Category } from '@/lib/categories';
+
+interface Props {
+  value: number;
+  max?: number;
+  label: string;
+  category?: Category | 'primary';
+  showValue?: boolean;
+  class?: string;
+}
+const { value, max = 100, label, category, showValue = true, class: className } = Astro.props;
+const pct = Math.max(0, Math.min(100, Math.round((value / max) * 100)));
+---
+
+<div class:list={[category && `cat-${category}`, className]}>
+  <div class="mb-1.5 flex items-baseline justify-between gap-3 text-sm font-medium">
+    <span>{label}</span>
+    {showValue && <span class="text-ink-soft tabular-nums">{value} / {max}</span>}
+  </div>
+  <div
+    role="progressbar"
+    aria-label={label}
+    aria-valuemin={0}
+    aria-valuemax={max}
+    aria-valuenow={value}
+    class="h-4 overflow-hidden rounded-full border-2 border-line bg-surface"
+  >
+    <div class="h-full border-r-2 border-line bg-accent" style={`width:${pct}%`}></div>
+  </div>
+</div>

@@ -1,0 +1,174 @@
+---
+/**
+ * "Pon-san" — original tanuki-in-a-suit mascot (simple SVG, no external assets).
+ * Poses: wave (home), cheer (lesson complete), sleepy (empty states), card (meishi exchange).
+ * Decorative by default; pass `label` to expose it to screen readers.
+ */
+export type TanukiPose = 'wave' | 'cheer' | 'sleepy' | 'card';
+interface Props {
+  pose?: TanukiPose;
+  size?: number;
+  label?: string;
+  class?: string;
+  animate?: boolean;
+}
+const { pose = 'wave', size = 120, label, class: className = '', animate = false } = Astro.props;
+
+const fur = '#A9754F';
+const furDark = '#6B4630';
+const mask = '#3A2A2E';
+const muzzle = '#F6E7CF';
+const suit = '#2E2A5C';
+const tie = '#5B3DF5';
+const ink = '#1E1B3A';
+const sw = 2.5;
+// Outlines follow the theme's --line token so Pon-san stays visible on dark cards.
+const line = 'var(--line)';
+
+const raiseRight = pose === 'wave' || pose === 'cheer';
+const raiseLeft = pose === 'cheer';
+const eyesClosed = pose === 'sleepy';
+---
+
+<svg
+  viewBox="0 0 140 150"
+  width={size}
+  height={Math.round((size * 150) / 140)}
+  class:list={['tanuki', className, animate && 'anim-wiggle']}
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  stroke={line}
+  stroke-width={sw}
+  stroke-linejoin="round"
+  stroke-linecap="round"
+>
+  {/* striped tail */}
+  <g transform="rotate(-25 108 118)">
+    <ellipse cx="108" cy="118" rx="13" ry="22" fill={fur} />
+    <path d="M96 112 Q108 108 120 112" fill="none" stroke={furDark} stroke-width="4" />
+    <path d="M97 124 Q108 120 119 124" fill="none" stroke={furDark} stroke-width="4" />
+    <ellipse cx="108" cy="118" rx="13" ry="22" fill="none" />
+  </g>
+
+  {/* left arm (viewer's left) */}
+  {
+    raiseLeft ? (
+      <g>
+        <path d="M44 92 Q28 78 26 62" fill="none" stroke={line} stroke-width="15" />
+        <path d="M44 92 Q28 78 26 62" fill="none" stroke={suit} stroke-width="10" />
+        <circle cx="26" cy="58" r="7" fill={fur} />
+      </g>
+    ) : (
+      <g>
+        <path d="M44 92 Q34 104 36 116" fill="none" stroke={line} stroke-width="15" />
+        <path d="M44 92 Q34 104 36 116" fill="none" stroke={suit} stroke-width="10" />
+        <circle cx="37" cy="119" r="7" fill={fur} />
+      </g>
+    )
+  }
+
+  {/* body / suit */}
+  <path d="M42 86 Q70 76 98 86 L102 128 Q70 142 38 128 Z" fill={suit} />
+  {/* shirt */}
+  <path d="M60 83 L70 104 L80 83 Q70 80 60 83 Z" fill="#FFFFFF" />
+  {/* tie */}
+  <path d="M70 86 L66 92 L68 112 L70 116 L72 112 L74 92 Z" fill={tie} />
+  {/* lapels */}
+  <path d="M58 84 L66 104 M82 84 L74 104" fill="none" />
+  {/* pocket square */}
+  <path d="M84 104 L94 103 L93 108 L84 109 Z" fill="#FF8FB8" stroke-width="2" />
+
+  {/* feet */}
+  <ellipse cx="56" cy="138" rx="11" ry="6" fill={furDark} />
+  <ellipse cx="84" cy="138" rx="11" ry="6" fill={furDark} />
+
+  {/* right arm */}
+  {
+    raiseRight ? (
+      <g>
+        <path d="M96 92 Q112 78 114 62" fill="none" stroke={line} stroke-width="15" />
+        <path d="M96 92 Q112 78 114 62" fill="none" stroke={suit} stroke-width="10" />
+        <circle cx="114" cy="58" r="7" fill={fur} />
+      </g>
+    ) : pose === 'card' ? (
+      <g>
+        <path d="M96 92 Q106 100 100 108" fill="none" stroke={line} stroke-width="15" />
+        <path d="M96 92 Q106 100 100 108" fill="none" stroke={suit} stroke-width="10" />
+        <rect x="84" y="98" width="30" height="18" rx="2" fill="#FFFFFF" transform="rotate(-12 99 107)" />
+        <path d="M89 104 L104 101 M90 109 L100 107" fill="none" stroke-width="2" transform="rotate(-2 99 107)" />
+        <circle cx="100" cy="111" r="6" fill={fur} />
+      </g>
+    ) : (
+      <g>
+        <path d="M96 92 Q106 104 104 116" fill="none" stroke={line} stroke-width="15" />
+        <path d="M96 92 Q106 104 104 116" fill="none" stroke={suit} stroke-width="10" />
+        <circle cx="103" cy="119" r="7" fill={fur} />
+      </g>
+    )
+  }
+
+  {/* ears */}
+  <circle cx="44" cy="26" r="11" fill={fur} />
+  <circle cx="44" cy="27" r="5" fill={furDark} stroke="none" />
+  <circle cx="96" cy="26" r="11" fill={fur} />
+  <circle cx="96" cy="27" r="5" fill={furDark} stroke="none" />
+
+  {/* head */}
+  <ellipse cx="70" cy="52" rx="36" ry="31" fill={fur} />
+  {/* eye mask */}
+  <path d="M38 52 Q44 40 58 46 Q62 56 54 62 Q42 64 38 52 Z" fill={mask} stroke="none" />
+  <path d="M102 52 Q96 40 82 46 Q78 56 86 62 Q98 64 102 52 Z" fill={mask} stroke="none" />
+  {/* muzzle */}
+  <ellipse cx="70" cy="64" rx="17" ry="13" fill={muzzle} />
+  {/* forehead stripe */}
+  <path d="M70 24 L70 36" fill="none" stroke={furDark} stroke-width="4" />
+
+  {/* eyes */}
+  {
+    eyesClosed ? (
+      <g fill="none" stroke="#FFFFFF" stroke-width="2.5">
+        <path d="M44 53 Q50 57 55 53" />
+        <path d="M85 53 Q90 57 96 53" />
+      </g>
+    ) : (
+      <g stroke="none">
+        <circle cx="50" cy="52" r="4.5" fill="#FFFFFF" />
+        <circle cx="90" cy="52" r="4.5" fill="#FFFFFF" />
+        <circle cx="51" cy="52.5" r="2.4" fill={ink} />
+        <circle cx="89" cy="52.5" r="2.4" fill={ink} />
+      </g>
+    )
+  }
+
+  {/* nose + mouth */}
+  <ellipse cx="70" cy="59" rx="5" ry="3.5" fill={ink} stroke="none" />
+  {
+    pose === 'cheer' ? (
+      <path d="M63 66 Q70 76 77 66 Z" fill="#E8556F" />
+    ) : (
+      <path d="M63 66 Q66.5 70 70 66 Q73.5 70 77 66" fill="none" stroke-width="2" />
+    )
+  }
+  {/* blush */}
+  <circle cx="48" cy="66" r="4.5" fill="#FF8FB8" stroke="none" opacity="0.75" />
+  <circle cx="92" cy="66" r="4.5" fill="#FF8FB8" stroke="none" opacity="0.75" />
+
+  {/* extras */}
+  {
+    pose === 'sleepy' && (
+      <g fill="none" stroke={line} stroke-width="2.5">
+        <path d="M112 14 L122 14 L112 24 L122 24" />
+        <path d="M124 2 L130 2 L124 8 L130 8" stroke-width="2" />
+      </g>
+    )
+  }
+  {
+    pose === 'cheer' && (
+      <g fill="#FFD23F" stroke={line} stroke-width="2">
+        <path d="M14 30 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 z" />
+        <path d="M124 30 l2.5 5.5 5.5 2.5 -5.5 2.5 -2.5 5.5 -2.5 -5.5 -5.5 -2.5 5.5 -2.5 z" />
+      </g>
+    )
+  }
+</svg>

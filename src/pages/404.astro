@@ -1,0 +1,20 @@
+---
+/** 404: GitHub Pages serves dist/404.html for any unknown URL. */
+import Base from '@/layouts/Base.astro';
+import Tanuki from '@/components/mascot/Tanuki.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Base title="Page not found" description="This page doesn't exist.">
+  <section class="sticker-card mx-auto flex max-w-lg flex-col items-center gap-3 p-8 text-center">
+    <Tanuki pose="sleepy" size={120} label="Pon-san napping" />
+    <h1 class="text-3xl">Page not found</h1>
+    <p lang="ja" class="ja-body text-ink-soft">{'申し訳ございません。'}</p>
+    <p class="text-ink-soft">We couldn't find that page. It may have moved, or the link may have a typo.</p>
+    <div class="mt-2 flex flex-wrap justify-center gap-3">
+      <a href={`${base}/`} class="btn btn-primary">Go to the home page</a>
+      <a href={`${base}/lessons`} class="btn btn-secondary">Browse lessons</a>
+    </div>
+  </section>
+</Base>

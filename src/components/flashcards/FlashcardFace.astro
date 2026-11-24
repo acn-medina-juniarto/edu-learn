@@ -1,0 +1,54 @@
+---
+/**
+ * Static flashcard. The real deck (Phase 5) reuses this markup and the
+ * .flip-card CSS; the flip is a 3D turn, or an instant swap with reduced motion.
+ */
+import Ja from '@/components/ja/Ja.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { toPlain } from '@/lib/furigana';
+
+interface Props {
+  word: string; // furigana markup
+  meaning: string;
+  pos: string;
+  exampleJa?: string;
+  exampleEn?: string;
+  flipped?: boolean;
+  category?: string;
+  id?: string;
+}
+const { word, meaning, pos, exampleJa, exampleEn, flipped = false, category = 'keigo', id } = Astro.props;
+// Long phrases step down from 52px so they don't break mid-word on phones.
+const len = toPlain(word).length;
+const frontSize = len <= 4 ? 'ja-card' : len <= 7 ? 'text-[2.25rem] leading-[1.9]' : 'text-[1.75rem] leading-[1.9]';
+---
+
+<div class:list={['flip-card', `cat-${category}`]} data-flipped={flipped ? 'true' : 'false'} id={id}>
+  <div class="flip-inner">
+    <div class="flip-face sticker-card flex flex-col items-center justify-center p-6 text-center">
+      <span class="badge mb-3 !text-xs">Front</span>
+      <Ja text={word} size="inherit" as="p" class:list={[frontSize, 'font-medium [word-break:keep-all]']} />
+      <p class="mt-3 text-sm text-ink-soft">Tap or press Space to flip</p>
+    </div>
+    <div class="flip-face flip-back sticker-card flex flex-col justify-center gap-2 p-6">
+      <div class="flex items-center justify-between gap-2">
+        <span class="badge !text-xs">Back</span>
+        <span class="text-sm text-ink-soft">{pos}</span>
+      </div>
+      <Ja text={word} as="p" class="text-3xl font-medium" />
+      <p class="font-display text-xl font-semibold">{meaning}</p>
+      {
+        exampleJa && (
+          <div class="mt-1 rounded-[12px] border-2 border-line bg-surface-2 p-3">
+            <Ja text={exampleJa} en={exampleEn} />
+          </div>
+        )
+      }
+      <button type="button" class="btn btn-ghost btn-sm self-start" data-speak={toPlain(word)}>
+        <Icon name="speaker" /> Listen<span class="sr-only">: <span lang="ja">{toPlain(word)}</span></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Flip styles live in global.css (.flip-card) so the Preact deck shares them. -->

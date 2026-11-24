@@ -1,0 +1,33 @@
+---
+/** /email: business email builder (Preact island, hydrated on load). */
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/ui/Icon.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import LessonToolbar from '@/components/lesson/LessonToolbar.astro';
+import EmailBuilder from '@/components/email/EmailBuilder';
+import { getEmailTemplates } from '@/lib/content';
+
+const templates = await getEmailTemplates();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Base title="Email builder" description="Build polite Japanese business emails from explained templates.">
+  <LessonToolbar slot="toolbar" playAll={false} />
+  <div class="mb-8">
+    <SectionHeading level={1} category="email">Email builder</SectionHeading>
+    <p class="max-w-prose text-ink-soft">
+      Pick a common business email, fill in the names and details, and copy a ready-to-send draft. Turn on
+      "Explain each part" to see why each line is written that way. New to email structure? Start with{' '}
+      <a class="font-semibold underline underline-offset-4" href={`${base}/lessons/email-basics`}>lesson 3</a>.
+    </p>
+    {
+      templates.some((t) => !t.reviewed) && (
+        <p class="mt-2 text-sm text-ink-soft">
+          <Icon name="info" size={16} class="mr-1 inline align-[-3px]" />
+          Draft templates: awaiting native-speaker review. Always read an email before you send it.
+        </p>
+      )
+    }
+  </div>
+  <EmailBuilder client:load templates={templates} />
+</Base>

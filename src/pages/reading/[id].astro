@@ -1,0 +1,101 @@
+---
+/** /reading/[id]: passage (furigana / English toggles, play all), glossary, and questions. */
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/ui/Icon.astro';
+import LevelBadge from '@/components/ui/LevelBadge.astro';
+import Ja from '@/components/ja/Ja.astro';
+import PolitenessTag from '@/components/ja/PolitenessTag.astro';
+import LessonToolbar from '@/components/lesson/LessonToolbar.astro';
+import Tanuki from '@/components/mascot/Tanuki.astro';
+import QuizRunner from '@/components/quiz/QuizRunner';
+import { getReading } from '@/lib/content';
+import { toPlain } from '@/lib/furigana';
+import { levelClass } from '@/lib/levels';
+
+export async function getStaticPaths() {
+  const all = await getReading();
+  return all.map((p) => ({ params: { id: p.id } }));
+}
+
+const all = await getReading();
+const idx = all.findIndex((p) => p.id === Astro.params.id);
+const p = all[idx];
+const next = all[idx + 1];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const href = `${base}/reading/${p.id}`;
+---
+
+<Base title={`${p.title} · Reading`} description={p.summary}>
+  <LessonToolbar slot="toolbar" playNoun="text" />
+  <article class:list={['mx-auto max-w-3xl', levelClass(p.level)]}>
+    <nav aria-label="Breadcrumb" class="mb-3 text-sm">
+      <a href={`${base}/reading#${p.level.toLowerCase()}`} class="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
+        ← Reading · {p.level}
+      </a>
+    </nav>
+    <div class="mb-2 flex flex-wrap items-center gap-2">
+      <LevelBadge level={p.level} showName />
+      <PolitenessTag level={p.politeness} />
+      <span class="text-sm text-ink-soft">· {p.minutes} min</span>
+    </div>
+    <h1 class="text-3xl sm:text-4xl">{p.title}</h1>
+    <p class="mt-1 text-ink-soft">{p.summary}</p>
+
+    <!-- The text: on cream/white, never on a fill -->
+    <section class="sticker-card mt-6 p-5 sm:p-6" aria-labelledby="text-h">
+      <h2 id="text-h" class="mb-4"><Ja text={p.titleJa} size="dialogue" /></h2>
+      <div class="grid gap-4">
+        {
+          p.paragraphs.map((para) => (
+            <div class="flex items-start gap-2" data-line-speech={toPlain(para.ja)}>
+              <div class="min-w-0 flex-1">
+                <Ja text={para.ja} en={para.en} size="dialogue" as="p" />
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm flex-none !px-2" data-speak={toPlain(para.ja)} aria-label="Play this paragraph">
+                <Icon name="speaker" />
+              </button>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mt-8" aria-labelledby="gloss-h">
+      <h2 id="gloss-h" class="mb-3 text-xl">Glossary</h2>
+      <dl class="sticker-card grid gap-x-4 gap-y-2 p-4 sm:grid-cols-[auto_minmax(0,1fr)]">
+        {
+          p.glossary.map((g) => (
+            <>
+              <dt>
+                <ruby lang="ja" class="text-lg font-medium">
+                  {g.word}
+                  <rp>(</rp>
+                  <rt>{g.reading}</rt>
+                  <rp>)</rp>
+                </ruby>
+              </dt>
+              <dd class="text-ink-soft max-sm:mb-2">{g.meaning}</dd>
+            </>
+          ))
+        }
+      </dl>
+    </section>
+
+    <section class="mt-10" aria-labelledby="q-h">
+      <h2 id="q-h" class="mb-4 text-xl">Check your understanding</h2>
+      <QuizRunner
+        client:only="preact"
+        lessonId={`reading-${p.id}`}
+        lessonTitle={p.title}
+        questions={p.questions}
+        lessonHref={href}
+        nextHref={next ? `${base}/reading/${next.id}` : undefined}
+        nextTitle={next?.title}
+      >
+        <Tanuki slot="mascotCheer" pose="cheer" size={110} label="Pon-san cheering" />
+        <Tanuki slot="mascotWave" pose="wave" size={110} label="Pon-san waving" />
+        <div slot="fallback" class="sticker-card p-6 text-center text-ink-soft">Loading questions…</div>
+      </QuizRunner>
+    </section>
+  </article>
+</Base>

@@ -1,0 +1,18 @@
+---
+/** Heading with a highlighter swipe. Use level={1} for a page's title (one per page). */
+import type { Category } from '@/lib/categories';
+
+interface Props {
+  level?: 1 | 2 | 3;
+  category?: Category | 'primary';
+  id?: string;
+  class?: string;
+}
+const { level = 2, category = 'email', id, class: className } = Astro.props;
+const Tag = (`h${level}` as 'h1' | 'h2' | 'h3');
+const size = { 1: 'text-3xl sm:text-4xl', 2: 'text-2xl sm:text-3xl', 3: 'text-xl sm:text-2xl' }[level];
+---
+
+<Tag id={id} class:list={[size, 'mb-4', `cat-${category}`, className]}>
+  <span class="swipe"><slot /></span>
+</Tag>

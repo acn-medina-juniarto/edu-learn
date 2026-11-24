@@ -1,0 +1,114 @@
+---
+/**
+ * End-of-lesson card. One primary action ("Finish lesson"), which saves
+ * completion to localStorage and swaps to a celebration state.
+ */
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Ja from '@/components/ja/Ja.astro';
+import Tanuki from '@/components/mascot/Tanuki.astro';
+
+interface Props {
+  lessonId: string;
+  quizHref: string;
+  quizCount: number;
+  vocabIds: string[];
+  flashcardsHref: string;
+  nextHref?: string;
+  nextTitle?: string;
+  lessonsHref: string;
+}
+const { lessonId, quizHref, quizCount, vocabIds, flashcardsHref, nextHref, nextTitle, lessonsHref } = Astro.props;
+---
+
+<section
+  class="sticker-card p-6 text-center"
+  aria-labelledby="finish-heading"
+  data-lesson-complete={lessonId}
+  data-vocab-ids={vocabIds.join(',')}
+>
+  <div data-state="ready">
+    <h2 id="finish-heading" class="text-2xl">You reached the end</h2>
+    <p class="mx-auto mt-2 max-w-prose text-ink-soft">
+      Mark this lesson as done to save your progress on this device.
+    </p>
+    <Button class="mt-5" data-finish>
+      <Icon name="check" /> Finish lesson
+    </Button>
+  </div>
+
+  <div data-state="done" hidden>
+    <div class="flex justify-center" data-celebrate>
+      <Tanuki pose="cheer" size={130} label="Pon-san cheering" />
+    </div>
+    <p class="mt-3 font-display text-3xl font-semibold" tabindex="-1" data-done-heading>Lesson complete!</p>
+    <Ja as="p" text="よくできました！" class="text-ink-soft" />
+    <p class="mt-1 text-sm text-ink-soft" data-done-date></p>
+    <p class="mt-2 text-sm" data-cards-added hidden>
+      <a href={flashcardsHref} class="font-semibold underline underline-offset-4"></a>
+    </p>
+    <p class="mt-4 text-ink-soft">Check what stuck with a {quizCount}-question quiz.</p>
+    <div class="mt-4 flex flex-wrap justify-center gap-3">
+      <Button href={quizHref}>
+        Take the quiz <Icon name="arrow-right" />
+      </Button>
+      {
+        nextHref ? (
+          <Button variant="secondary" href={nextHref}>
+            Next: {nextTitle}
+          </Button>
+        ) : (
+          <Button variant="secondary" href={lessonsHref}>
+            All lessons
+          </Button>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  import { confettiBurst, replayAnimation } from '@/lib/confetti';
+  import { addCards } from '@/lib/deck';
+  import { markLessonComplete, readProgress } from '@/lib/progress';
+
+  const root = document.querySelector<HTMLElement>('[data-lesson-complete]');
+  const id = root?.dataset.lessonComplete ?? '';
+  const ready = root?.querySelector<HTMLElement>('[data-state="ready"]');
+  const done = root?.querySelector<HTMLElement>('[data-state="done"]');
+  const dateEl = root?.querySelector<HTMLElement>('[data-done-date]');
+
+  function showDone(completedAt: string, celebrate: boolean) {
+    if (!ready || !done) return;
+    ready.hidden = true;
+    done.hidden = false;
+    const d = new Date(completedAt);
+    if (dateEl) dateEl.textContent = `Completed on ${d.toLocaleDateString(undefined, { dateStyle: 'medium' })}`;
+    if (celebrate) {
+      const fx = done.querySelector<HTMLElement>('[data-celebrate]');
+      if (fx) {
+        replayAnimation(fx, 'anim-bounce');
+        confettiBurst(fx);
+      }
+      done.querySelector<HTMLElement>('[data-done-heading]')?.focus();
+    }
+  }
+
+  const existing = readProgress().lessons[id];
+  if (existing) showDone(existing.completedAt, false);
+
+  root?.querySelector('[data-finish]')?.addEventListener('click', () => {
+    const p = markLessonComplete(id);
+    // Finishing a lesson puts its words into the flashcard deck
+    const ids = (root.dataset.vocabIds ?? '').split(',').filter(Boolean);
+    const added = addCards(ids);
+    const note = root.querySelector<HTMLElement>('[data-cards-added]');
+    const link = note?.querySelector('a');
+    if (note && link && added.length) {
+      link.textContent = `${added.length} ${added.length === 1 ? 'word' : 'words'} added to your flashcards`;
+      note.hidden = false;
+    }
+    showDone(p.lessons[id].completedAt, true);
+    document.dispatchEvent(new CustomEvent('lesson:complete', { detail: { id } }));
+  });
+</script>

@@ -1,0 +1,156 @@
+---
+/**
+ * /review — checklist for a native-speaker reviewer: lists every lesson's
+ * review status and every needsReview note, with the Japanese in context.
+ */
+import Base from '@/layouts/Base.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Ja from '@/components/ja/Ja.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import {
+  getEmailTemplates,
+  getGrammar,
+  getKanji,
+  getKeigo,
+  getLessons,
+  getReading,
+  jaStringCount,
+  reviewItems,
+  type ReviewItem,
+} from '@/lib/content';
+
+const lessons = await getLessons();
+const keigo = await getKeigo();
+const emails = await getEmailTemplates();
+const grammar = await getGrammar();
+const kanjiFiles = await getKanji();
+const readings = await getReading();
+const grammarItems: ReviewItem[] = grammar.flatMap(({ point: g }) => [
+  ...(g.needsReview ? [{ path: `grammar ${g.level} · ${g.id}`, note: g.needsReview, context: g.pattern }] : []),
+  ...g.examples.filter((x) => x.needsReview).map((x) => ({ path: `grammar ${g.id} · example`, note: x.needsReview!, context: x.ja })),
+]);
+const kanjiItems: ReviewItem[] = kanjiFiles.flatMap((f) =>
+  f.kanji.filter((k) => k.needsReview).map((k) => ({ path: `kanji ${f.level} · ${k.char}`, note: k.needsReview! })),
+);
+const readingItems: ReviewItem[] = readings.flatMap((r) => [
+  ...(r.needsReview ? [{ path: `reading ${r.id}`, note: r.needsReview }] : []),
+  ...r.paragraphs
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => p.needsReview)
+    .map(({ p, i }) => ({ path: `reading ${r.id} · paragraph ${i + 1}`, note: p.needsReview!, context: p.ja })),
+]);
+const rows = lessons.map((l) => ({ l, items: reviewItems(l), count: jaStringCount(l) }));
+const keigoItems: ReviewItem[] = keigo.entries
+  .filter((e) => e.needsReview)
+  .map((e) => ({ path: `keigo: ${e.id}`, note: e.needsReview!, context: e.plain }));
+const emailItems: ReviewItem[] = emails.flatMap((t) => [
+  ...(t.needsReview ? [{ path: `email ${t.id}`, note: t.needsReview }] : []),
+  ...t.blocks.filter((b) => b.needsReview).map((b) => ({ path: `email ${t.id} · ${b.role}`, note: b.needsReview!, context: b.ja })),
+]);
+const others = [
+  { id: 'keigo', title: `Keigo reference (${keigo.entries.length} verbs)`, reviewed: keigo.reviewed, items: keigoItems },
+  ...emails.map((t) => ({
+    id: `email-${t.id}`,
+    title: `Email template: ${t.title}`,
+    reviewed: t.reviewed,
+    items: emailItems.filter((i) => i.path.startsWith(`email ${t.id}`)),
+  })),
+  { id: 'grammar', title: `Grammar (${grammar.length} points, N5–N1)`, reviewed: grammar.every((g) => g.point.reviewed), items: grammarItems },
+  {
+    id: 'kanji',
+    title: `Kanji (${kanjiFiles.reduce((n, f) => n + f.kanji.length, 0)} kanji, N5–N1)`,
+    reviewed: kanjiFiles.every((f) => f.reviewed),
+    items: kanjiItems,
+  },
+  { id: 'reading', title: `Reading (${readings.length} passages, N5–N1)`, reviewed: readings.every((r) => r.reviewed), items: readingItems },
+];
+const total =
+  rows.reduce((n, r) => n + r.items.length, 0) +
+  keigoItems.length +
+  emailItems.length +
+  grammarItems.length +
+  kanjiItems.length +
+  readingItems.length;
+---
+
+<Base title="Content review" description="Native-speaker review checklist.">
+  <SectionHeading level={1} category="keigo">Content review</SectionHeading>
+  <p class="mb-6 max-w-prose text-ink-soft">
+    For native-speaker reviewers. All content is original and marked <code>reviewed: false</code>. Items below are
+    places where the author was unsure. When a file has been checked, set <code>reviewed: true</code> in its
+    frontmatter and remove resolved <code>needsReview</code> notes.
+  </p>
+  <p class="mb-8 font-semibold">
+    {total} open review notes across {lessons.length} lessons, the keigo reference, {emails.length} email templates and
+    the N5–N1 study sections.
+  </p>
+
+  {
+    rows.map(({ l, items, count }) => (
+      <section class="sticker-card mb-6 p-5" aria-labelledby={`r-${l.id}`}>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 id={`r-${l.id}`} class="text-xl">
+            {l.order}. {l.title}
+          </h2>
+          {l.reviewed ? (
+            <Badge category="meetings">
+              <Icon name="check" size={14} /> Reviewed
+            </Badge>
+          ) : (
+            <Badge category="email">
+              <Icon name="info" size={14} /> Not reviewed
+            </Badge>
+          )}
+        </div>
+        <p class="mt-1 text-sm text-ink-soft">
+          content/lessons · {count} Japanese strings · {items.length} review notes
+        </p>
+        {items.length > 0 && (
+          <ul class="mt-4 grid gap-3">
+            {items.map((it) => (
+              <li class="rounded-[12px] border-2 border-line bg-surface-2 p-3">
+                <p class="text-sm font-semibold">{it.path}</p>
+                {it.context && <Ja as="p" text={it.context} class="mt-1" />}
+                <p class="mt-1 text-sm">{it.note}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ))
+  }
+
+  {
+    others.map((o) => (
+      <section class="sticker-card mb-6 p-5" aria-labelledby={`r-${o.id}`}>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 id={`r-${o.id}`} class="text-xl">
+            {o.title}
+          </h2>
+          {o.reviewed ? (
+            <Badge category="meetings">
+              <Icon name="check" size={14} /> Reviewed
+            </Badge>
+          ) : (
+            <Badge category="email">
+              <Icon name="info" size={14} /> Not reviewed
+            </Badge>
+          )}
+        </div>
+        <p class="mt-1 text-sm text-ink-soft">{o.items.length} review notes</p>
+        {o.items.length > 0 && (
+          <ul class="mt-4 grid gap-3">
+            {o.items.map((it) => (
+              <li class="rounded-[12px] border-2 border-line bg-surface-2 p-3">
+                <p class="text-sm font-semibold">{it.path}</p>
+                {it.context && <Ja as="p" text={it.context.replace(/\{\{(\w+)\}\}/g, '〔$1〕')} class="mt-1" />}
+                <p class="mt-1 text-sm">{it.note}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ))
+  }
+</Base>

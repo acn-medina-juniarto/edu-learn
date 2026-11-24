@@ -1,0 +1,15 @@
+---
+/** "Add to flashcards" button; state is synced by src/scripts/deck-buttons.ts. */
+interface Props {
+  vocabId?: string;
+  class?: string;
+  id?: string;
+}
+const { vocabId = '', class: className, id } = Astro.props;
+---
+
+<button type="button" id={id} class:list={['btn btn-secondary btn-sm', className]} data-add-card={vocabId} data-in-deck="false">
+  <svg class="icon-add" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+  <svg class="icon-added" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+  <span data-add-label aria-live="polite">Add to flashcards</span>
+</button>

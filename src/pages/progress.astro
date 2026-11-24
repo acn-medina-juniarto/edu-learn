@@ -1,0 +1,30 @@
+---
+/** /progress: streak, stats, activity chart, lesson scores, and backups (client-only island). */
+import Base from '@/layouts/Base.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import Tanuki from '@/components/mascot/Tanuki.astro';
+import ProgressDashboard, { type LessonRow } from '@/components/progress/ProgressDashboard';
+import { getLessons } from '@/lib/content';
+
+const lessons = await getLessons();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const rows: LessonRow[] = lessons.map((l) => ({
+  id: l.id,
+  order: l.order,
+  title: l.title,
+  titleJa: l.titleJa,
+  category: l.category,
+  href: `${base}/lessons/${l.id}`,
+  vocabIds: l.vocab.map((v) => v.id),
+}));
+---
+
+<Base title="Your progress" description="Your streak, lessons completed, quiz scores and flashcard activity.">
+  <SectionHeading level={1} category="meetings">Your progress</SectionHeading>
+  <p class="mb-6 max-w-prose text-ink-soft">Everything here is saved in this browser only.</p>
+  <ProgressDashboard client:only="preact" lessons={rows} lessonsHref={`${base}/lessons/${rows[0].id}`}>
+    <Tanuki slot="mascotSleepy" pose="sleepy" size={110} label="Pon-san napping" />
+    <div slot="fallback" class="sticker-card p-6 text-center text-ink-soft">Loading your progress…</div>
+  </ProgressDashboard>
+  <noscript><p class="sticker-card p-6">The progress page needs JavaScript to read your saved data.</p></noscript>
+</Base>

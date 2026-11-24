@@ -1,0 +1,27 @@
+---
+/** Grammar / keigo / culture note. Body is Markdown with furigana. */
+import Badge from '@/components/ui/Badge.astro';
+import Mixed from '@/components/ja/Mixed.astro';
+import { NOTE_LABELS } from '@/lib/labels';
+import type { Note } from '@/lib/schemas';
+
+interface Props {
+  note: Note;
+}
+const { note } = Astro.props;
+const label = NOTE_LABELS[note.type];
+---
+
+<article class:list={['sticker-card overflow-hidden', `cat-${label.category}`]}>
+  <div class="h-3 border-b-2 border-line bg-accent" aria-hidden="true"></div>
+  <div class="p-5">
+    <div class="mb-2 flex flex-wrap items-center gap-2">
+      <Badge category={label.category}>
+        {label.en} <span lang="ja" class="!leading-none">{label.ja}</span>
+      </Badge>
+      {note.level && <Badge category="primary">JLPT {note.level}</Badge>}
+    </div>
+    <Mixed as="h3" text={note.title} class="mb-3 text-xl" />
+    <Mixed text={note.body} markdown />
+  </div>
+</article>

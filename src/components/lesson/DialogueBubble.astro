@@ -1,0 +1,98 @@
+---
+/**
+ * One dialogue line as a speech bubble. Japanese stays on white/cream surfaces;
+ * the speaker's accent color is used only on the avatar sticker.
+ * `speech` overrides the text sent to audio (controlled readings for numbers etc.).
+ */
+import Ja from '@/components/ja/Ja.astro';
+import Mixed from '@/components/ja/Mixed.astro';
+import PolitenessTag from '@/components/ja/PolitenessTag.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { toPlain } from '@/lib/furigana';
+import type { Accent, Politeness } from '@/lib/types';
+
+interface Props {
+  speakerName: string;
+  speakerNameJa?: string;
+  speakerRole?: string;
+  ja: string;
+  en: string;
+  side?: 'left' | 'right';
+  accent?: Accent;
+  politeness?: Politeness;
+  note?: string;
+  speech?: string;
+  index?: number;
+}
+const {
+  speakerName,
+  speakerNameJa,
+  speakerRole,
+  ja,
+  en,
+  side = 'left',
+  accent = 'ramune',
+  politeness,
+  note,
+  speech,
+  index,
+} = Astro.props;
+const right = side === 'right';
+const audioText = speech ?? toPlain(ja);
+---
+
+<div
+  class:list={['dialogue-line flex items-end gap-2.5', right && 'flex-row-reverse']}
+  data-line-speech={audioText}
+  data-line-index={index}
+>
+  <div
+    class="grid h-11 w-11 flex-none place-items-center rounded-full border-2 border-line font-display text-lg font-semibold text-on-accent"
+    style={`background: var(--${accent})`}
+    aria-hidden="true"
+  >
+    {speakerName.slice(0, 1)}
+  </div>
+  <div class:list={['min-w-0 max-w-[85%] sm:max-w-[75%]', right && 'items-end text-right']}>
+    <p class:list={['mb-1 text-sm font-semibold', right && 'text-right']}>
+      {speakerName}
+      {speakerNameJa && <Ja text={speakerNameJa} size="inherit" class="sr-only" />}
+      {speakerRole && <span class="font-normal text-ink-soft"> · {speakerRole}</span>}
+    </p>
+    <div
+      class:list={[
+        'bubble relative rounded-[16px] border-2 border-line px-4 pb-3 pt-2 text-left shadow-[3px_3px_0_var(--shadow)]',
+        right ? 'rounded-br-[4px] bg-surface' : 'rounded-bl-[4px] bg-surface-2',
+      ]}
+    >
+      <Ja text={ja} size="dialogue" as="p" />
+      <p class="en-translation mt-1 text-base leading-relaxed text-ink-soft">{en}</p>
+      <div class="mt-2 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm !min-h-11 !min-w-11 !px-2.5"
+          data-speak={audioText}
+          aria-label={`Play this line: ${toPlain(ja)}`}
+        >
+          <Icon name="speaker" />
+        </button>
+        {politeness && <PolitenessTag level={politeness} />}
+      </div>
+      {
+        note && (
+          <p class="mt-2 flex gap-1.5 border-t-2 border-dashed border-line/30 pt-2 text-sm leading-relaxed text-ink-soft">
+            <Icon name="info" size={16} class="mt-1 flex-none" />
+            <Mixed text={note} />
+          </p>
+        )
+      }
+    </div>
+  </div>
+</div>
+
+<style>
+  .dialogue-line[data-speaking='true'] .bubble {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+  }
+</style>

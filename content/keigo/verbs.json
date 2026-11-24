@@ -1,0 +1,258 @@
+{
+  "reviewed": false,
+  "notes": [
+    {
+      "type": "keigo",
+      "title": "The three kinds of keigo",
+      "level": "N4",
+      "body": "| Type | What it does | Example |\n|---|---|---|\n| **尊敬語** (sonkeigo) | Raises the *other person's* actions | {部長|ぶちょう}がおっしゃいました。 |\n| **謙譲語** (kenjougo) | Lowers *your own* actions toward them | わたくしが{申|もう}し{上|あ}げます。 |\n| **丁寧語** (teineigo) | Polite です・ます, to anyone | {言|い}います。 |\n\nThe golden rule: use 尊敬語 for the client or your superior, 謙譲語 for yourself and your own company (ウチ), and 丁寧語 as the baseline."
+    },
+    {
+      "type": "grammar",
+      "title": "Patterns for verbs without a special form",
+      "level": "N3",
+      "body": "| Pattern | Type | Example |\n|---|---|---|\n| お + stem + になる | 尊敬語 | お{待|ま}ちになる |\n| ご + する-noun + になる | 尊敬語 | ご{利用|りよう}になる |\n| 〜(ら)れる | 尊敬語 (lighter) | {読|よ}まれる |\n| お + stem + する / いたす | 謙譲語 | お{待|ま}ちする / お{待|ま}ちいたします |\n| ご + する-noun + する / いたす | 謙譲語 | ご{案内|あんない}いたします |\n| 〜ていただく / 〜てくださる | favors | {教|おし}えていただく / {教|おし}えてくださる |"
+    },
+    {
+      "type": "keigo",
+      "title": "謙譲語 I and 丁重語 (謙譲語 II)",
+      "level": "N1",
+      "body": "Humble verbs come in two flavors:\n\n- **謙譲語 I** lowers you *toward a specific person*: {伺|うかが}う (visit **them**), お{目|め}にかかる (meet **them**), {差|さ}し{上|あ}げる (give to **them**).\n- **丁重語** (謙譲語 II) is politeness *toward the listener*, whoever the action involves: {参|まい}る, {申|もう}す, いたす, おる.\n\nSo you can say {来週|らいしゅう}、{大阪|おおさか}へ{参|まい}ります (no one to honor in Osaka), but {大阪|おおさか}へ{伺|うかが}います sounds odd unless you're visiting the listener's office there."
+    },
+    {
+      "type": "culture",
+      "title": "Common keigo slips",
+      "body": "- **Honorifics for yourself**: わたくしがおっしゃいます ✗ → わたくしが{申|もう}します ✓\n- **Stacked honorifics**: おっしゃられる ✗ (おっしゃる is already honorific) → おっしゃる ✓\n- **ご{苦労|くろう}{様|さま}です to a superior**: it can sound like you're above them. Use お{疲|つか}れ{様|さま}です.\n- **Not every \"double\" form is wrong**: いただけますでしょうか is standard, natural business Japanese."
+    }
+  ],
+  "entries": [
+    {
+      "id": "iu",
+      "plain": "{言|い}う",
+      "meaning": "to say",
+      "sonkeigo": ["おっしゃる"],
+      "kenjougo": ["{申|もう}す", "{申|もう}し{上|あ}げる"],
+      "teineigo": "{言|い}います",
+      "examples": [
+        { "ja": "{部長|ぶちょう}がおっしゃったとおりです。", "en": "It's just as the manager said.", "politeness": "keigo" },
+        { "ja": "{心|こころ}よりお{礼|れい}{申|もう}し{上|あ}げます。", "en": "I sincerely thank you.", "politeness": "keigo" }
+      ],
+      "notes": "申す is for your name and ordinary statements. 申し上げる humbly says something to someone (お礼を申し上げます)."
+    },
+    {
+      "id": "iku",
+      "plain": "{行|い}く",
+      "meaning": "to go",
+      "sonkeigo": ["いらっしゃる", "おいでになる"],
+      "kenjougo": ["{伺|うかが}う", "{参|まい}る"],
+      "teineigo": "{行|い}きます",
+      "examples": [{ "ja": "{明日|あす}、{御社|おんしゃ}に{伺|うかが}います。", "en": "I'll visit your company tomorrow.", "politeness": "keigo" }],
+      "notes": "伺う = visiting the respected person's place. 参る = a polite 'go' that needs no respected destination."
+    },
+    {
+      "id": "kuru",
+      "plain": "{来|く}る",
+      "meaning": "to come",
+      "sonkeigo": ["いらっしゃる", "お{見|み}えになる", "お{越|こ}しになる"],
+      "kenjougo": ["{参|まい}る", "{伺|うかが}う"],
+      "teineigo": "{来|き}ます",
+      "examples": [{ "ja": "{田中様|たなかさま}がお{見|み}えになりました。", "en": "Ms. Tanaka has arrived.", "politeness": "keigo" }]
+    },
+    {
+      "id": "iru",
+      "plain": "いる",
+      "meaning": "to be (people), to stay",
+      "sonkeigo": ["いらっしゃる", "おいでになる"],
+      "kenjougo": ["おる"],
+      "teineigo": "います",
+      "examples": [{ "ja": "{部長|ぶちょう}は{今|いま}、いらっしゃいますか。", "en": "Is the manager in right now?", "politeness": "keigo" }],
+      "notes": "〜ております (humble ている) is everywhere in business: {担当|たんとう}しております."
+    },
+    {
+      "id": "suru",
+      "plain": "する",
+      "meaning": "to do",
+      "sonkeigo": ["なさる", "される"],
+      "kenjougo": ["いたす"],
+      "teineigo": "します",
+      "examples": [{ "ja": "お{飲|の}み{物|もの}はどうなさいますか。", "en": "What would you like to drink?", "politeness": "keigo" }],
+      "notes": "される (the passive form used as an honorific) is common but lighter than なさる."
+    },
+    {
+      "id": "miru",
+      "plain": "{見|み}る",
+      "meaning": "to see, to look at",
+      "sonkeigo": ["ご{覧|らん}になる"],
+      "kenjougo": ["{拝見|はいけん}する"],
+      "teineigo": "{見|み}ます",
+      "examples": [
+        { "ja": "{資料|しりょう}を{拝見|はいけん}しました。", "en": "I've looked through the materials.", "politeness": "keigo" },
+        { "ja": "こちらをご{覧|らん}ください。", "en": "Please take a look at this.", "politeness": "keigo" }
+      ]
+    },
+    {
+      "id": "taberu",
+      "plain": "{食|た}べる・{飲|の}む",
+      "meaning": "to eat, to drink",
+      "sonkeigo": ["{召|め}し{上|あ}がる"],
+      "kenjougo": ["いただく"],
+      "teineigo": "{食|た}べます・{飲|の}みます",
+      "examples": [{ "ja": "どうぞ{召|め}し{上|あ}がってください。", "en": "Please, help yourself.", "politeness": "keigo" }]
+    },
+    {
+      "id": "shitteiru",
+      "plain": "{知|し}っている",
+      "meaning": "to know",
+      "sonkeigo": ["ご{存|ぞん}じだ"],
+      "kenjougo": ["{存|ぞん}じている", "{存|ぞん}じ{上|あ}げている"],
+      "teineigo": "{知|し}っています",
+      "examples": [
+        { "ja": "{山田様|やまださま}のことはよく{存|ぞん}じ{上|あ}げております。", "en": "I know Mr. Yamada well.", "politeness": "keigo" },
+        { "ja": "{申|もう}し{訳|わけ}ございません、{存|ぞん}じません。", "en": "I'm sorry, I don't know.", "politeness": "keigo" }
+      ],
+      "notes": "存じ上げる is for knowing people. For facts, use 存じております. 'I don't know' becomes 存じません."
+    },
+    {
+      "id": "omou",
+      "plain": "{思|おも}う",
+      "meaning": "to think",
+      "sonkeigo": ["お{思|おも}いになる"],
+      "kenjougo": ["{存|ぞん}じる"],
+      "teineigo": "{思|おも}います",
+      "examples": [{ "ja": "ご{検討|けんとう}いただければと{存|ぞん}じます。", "en": "I would appreciate it if you could consider this.", "politeness": "keigo" }]
+    },
+    {
+      "id": "kiku",
+      "plain": "{聞|き}く",
+      "meaning": "to ask, to hear, to listen",
+      "sonkeigo": ["お{聞|き}きになる"],
+      "kenjougo": ["{伺|うかが}う", "{承|うけたまわ}る", "{拝聴|はいちょう}する"],
+      "teineigo": "{聞|き}きます",
+      "examples": [{ "ja": "ご{要望|ようぼう}を{承|うけたまわ}りました。", "en": "We have taken note of your request.", "politeness": "keigo" }],
+      "notes": "伺う = ask or hear. 承る = hear and accept (orders, requests). 拝聴する = listen, formal (a talk, a speech)."
+    },
+    {
+      "id": "au",
+      "plain": "{会|あ}う",
+      "meaning": "to meet",
+      "sonkeigo": ["お{会|あ}いになる"],
+      "kenjougo": ["お{目|め}にかかる", "お{会|あ}いする"],
+      "teineigo": "{会|あ}います",
+      "examples": [{ "ja": "お{目|め}にかかれて{光栄|こうえい}です。", "en": "It's an honor to meet you.", "politeness": "keigo" }]
+    },
+    {
+      "id": "ageru",
+      "plain": "あげる",
+      "meaning": "to give (to someone)",
+      "sonkeigo": [],
+      "kenjougo": ["{差|さ}し{上|あ}げる"],
+      "teineigo": "あげます",
+      "examples": [{ "ja": "{後|のち}ほどお{電話|でんわ}を{差|さ}し{上|あ}げます。", "en": "I'll call you later.", "politeness": "keigo" }],
+      "notes": "No honorific form. Avoid 〜て差し上げる to the person's face (教えて差し上げます sounds condescending); say お教えします instead."
+    },
+    {
+      "id": "morau",
+      "plain": "もらう",
+      "meaning": "to receive",
+      "sonkeigo": [],
+      "kenjougo": ["いただく", "{頂戴|ちょうだい}する"],
+      "teineigo": "もらいます",
+      "examples": [{ "ja": "ご{連絡|れんらく}をいただき、ありがとうございます。", "en": "Thank you for contacting us.", "politeness": "keigo" }]
+    },
+    {
+      "id": "kureru",
+      "plain": "くれる",
+      "meaning": "to give (to me / us)",
+      "sonkeigo": ["くださる"],
+      "kenjougo": [],
+      "teineigo": "くれます",
+      "examples": [{ "ja": "{田中様|たなかさま}がすぐにご{連絡|れんらく}くださいました。", "en": "Ms. Tanaka contacted us right away.", "politeness": "keigo" }],
+      "notes": "No humble form: you never give to yourself."
+    },
+    {
+      "id": "miseru",
+      "plain": "{見|み}せる",
+      "meaning": "to show",
+      "sonkeigo": ["お{見|み}せになる"],
+      "kenjougo": ["お{見|み}せする", "お{目|め}にかける", "ご{覧|らん}に{入|い}れる"],
+      "teineigo": "{見|み}せます",
+      "examples": [{ "ja": "{試作品|しさくひん}をお{見|み}せします。", "en": "Let me show you the prototype.", "politeness": "keigo" }],
+      "notes": "お見せする is the everyday humble form. お目にかける and ご覧に入れる are more formal."
+    },
+    {
+      "id": "matsu",
+      "plain": "{待|ま}つ",
+      "meaning": "to wait",
+      "sonkeigo": ["お{待|ま}ちになる"],
+      "kenjougo": ["お{待|ま}ちする"],
+      "teineigo": "{待|ま}ちます",
+      "examples": [{ "ja": "ご{連絡|れんらく}をお{待|ま}ちしております。", "en": "I look forward to hearing from you.", "politeness": "keigo" }]
+    },
+    {
+      "id": "yomu",
+      "plain": "{読|よ}む",
+      "meaning": "to read",
+      "sonkeigo": ["お{読|よ}みになる"],
+      "kenjougo": ["{拝読|はいどく}する"],
+      "teineigo": "{読|よ}みます",
+      "examples": [{ "ja": "メールを{拝読|はいどく}しました。", "en": "I have read your email.", "politeness": "keigo" }]
+    },
+    {
+      "id": "kariru",
+      "plain": "{借|か}りる",
+      "meaning": "to borrow",
+      "sonkeigo": ["お{借|か}りになる"],
+      "kenjougo": ["お{借|か}りする", "{拝借|はいしゃく}する"],
+      "teineigo": "{借|か}ります",
+      "examples": [{ "ja": "{会議室|かいぎしつ}をお{借|か}りしてもよろしいでしょうか。", "en": "May I use the meeting room?", "politeness": "keigo" }]
+    },
+    {
+      "id": "wakaru",
+      "plain": "{分|わ}かる",
+      "meaning": "to understand",
+      "sonkeigo": ["お{分|わ}かりになる"],
+      "kenjougo": ["{承知|しょうち}する", "かしこまる"],
+      "teineigo": "{分|わ}かります",
+      "examples": [{ "ja": "{承知|しょうち}いたしました。", "en": "Understood. / Certainly.", "politeness": "keigo" }],
+      "notes": "To superiors and clients, 承知いたしました is the safer reply. 了解しました is fine between colleagues. お分かりになりますか can sound like you doubt them, so ask ご不明な点はございませんか instead."
+    },
+    {
+      "id": "kaeru",
+      "plain": "{帰|かえ}る",
+      "meaning": "to go home, to leave",
+      "sonkeigo": ["お{帰|かえ}りになる"],
+      "kenjougo": ["{失礼|しつれい}する"],
+      "teineigo": "{帰|かえ}ります",
+      "examples": [{ "ja": "お{先|さき}に{失礼|しつれい}します。", "en": "I'll be heading out now. (leaving before others)", "politeness": "teinei" }]
+    },
+    {
+      "id": "neru",
+      "plain": "{寝|ね}る",
+      "meaning": "to sleep",
+      "sonkeigo": ["お{休|やす}みになる"],
+      "kenjougo": [],
+      "teineigo": "{寝|ね}ます",
+      "examples": [{ "ja": "{昨夜|さくや}はよくお{休|やす}みになれましたか。", "en": "Did you sleep well last night?", "politeness": "keigo" }]
+    },
+    {
+      "id": "suwaru",
+      "plain": "{座|すわ}る",
+      "meaning": "to sit",
+      "sonkeigo": ["おかけになる"],
+      "kenjougo": [],
+      "teineigo": "{座|すわ}ります",
+      "examples": [{ "ja": "どうぞ、おかけください。", "en": "Please, have a seat.", "politeness": "keigo" }]
+    },
+    {
+      "id": "renraku-suru",
+      "plain": "{連絡|れんらく}する",
+      "meaning": "to contact (pattern for する-nouns)",
+      "sonkeigo": ["ご{連絡|れんらく}くださる", "{連絡|れんらく}される"],
+      "kenjougo": ["ご{連絡|れんらく}する", "ご{連絡|れんらく}いたす"],
+      "teineigo": "{連絡|れんらく}します",
+      "examples": [{ "ja": "{改|あらた}めてご{連絡|れんらく}いたします。", "en": "I'll get back to you again.", "politeness": "keigo" }],
+      "notes": "Most する-nouns follow this pattern. Not every noun takes ご: check the dictionary.",
+      "needsReview": "Confirm ご連絡くださる / 連絡される are the best honorific forms to list (ご連絡なさる is grammatical but less common)."
+    }
+  ]
+}

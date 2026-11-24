@@ -1,0 +1,45 @@
+{
+  "level": "N4",
+  "reviewed": false,
+  "kanji": [
+    {
+      "char": "業",
+      "meanings": ["business", "industry", "work"],
+      "onyomi": ["ギョウ", "ゴウ"],
+      "kunyomi": ["わざ"],
+      "strokes": 13,
+      "businessCommon": true,
+      "examples": [
+        { "word": "営業", "reading": "えいぎょう", "meaning": "sales; business operations" },
+        { "word": "工業", "reading": "こうぎょう", "meaning": "industry, manufacturing" },
+        { "word": "残業", "reading": "ざんぎょう", "meaning": "overtime work" }
+      ]
+    },
+    {
+      "char": "送",
+      "meanings": ["send", "see off"],
+      "onyomi": ["ソウ"],
+      "kunyomi": ["おく-る"],
+      "strokes": 9,
+      "businessCommon": true,
+      "examples": [
+        { "word": "送る", "reading": "おくる", "meaning": "to send" },
+        { "word": "送付", "reading": "そうふ", "meaning": "sending (documents)" },
+        { "word": "送料", "reading": "そうりょう", "meaning": "shipping fee" }
+      ]
+    },
+    {
+      "char": "意",
+      "meanings": ["mind", "intention", "meaning"],
+      "onyomi": ["イ"],
+      "kunyomi": [],
+      "strokes": 13,
+      "businessCommon": true,
+      "examples": [
+        { "word": "意見", "reading": "いけん", "meaning": "opinion" },
+        { "word": "注意", "reading": "ちゅうい", "meaning": "caution, attention" },
+        { "word": "用意", "reading": "ようい", "meaning": "preparation" }
+      ]
+    }
+  ]
+}

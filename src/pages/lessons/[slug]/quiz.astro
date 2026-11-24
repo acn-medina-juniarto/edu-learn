@@ -1,0 +1,56 @@
+---
+/** /lessons/[slug]/quiz: one question per screen, Preact island (client-only for shuffling). */
+import { getCollection } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import Badge from '@/components/ui/Badge.astro';
+import LessonToolbar from '@/components/lesson/LessonToolbar.astro';
+import Tanuki from '@/components/mascot/Tanuki.astro';
+import QuizRunner from '@/components/quiz/QuizRunner';
+import { CATEGORIES } from '@/lib/categories';
+import { getLessons } from '@/lib/content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('lessons');
+  return entries.map((e) => ({ params: { slug: e.data.id } }));
+}
+
+const { slug } = Astro.params;
+const all = await getLessons();
+const idx = all.findIndex((l) => l.id === slug);
+const lesson = all[idx];
+const next = all[idx + 1];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const lessonHref = `${base}/lessons/${lesson.id}`;
+---
+
+<Base title={`Quiz: ${lesson.title}`} description={`Check what you learned in "${lesson.title}".`}>
+  <LessonToolbar slot="toolbar" playAll={false} />
+  <div class:list={['mx-auto max-w-2xl', `cat-${lesson.category}`]}>
+    <nav aria-label="Breadcrumb" class="mb-3 text-sm">
+      <a href={lessonHref} class="inline-flex min-h-11 items-center gap-1 font-semibold underline underline-offset-4">
+        ← Back to lesson
+      </a>
+    </nav>
+    <div class="mb-6 flex flex-wrap items-center gap-2">
+      <Badge category={lesson.category}>{CATEGORIES[lesson.category].label}</Badge>
+      <h1 class="text-2xl sm:text-3xl">Quiz: {lesson.title}</h1>
+    </div>
+
+    <QuizRunner
+      client:only="preact"
+      lessonId={lesson.id}
+      lessonTitle={lesson.title}
+      questions={lesson.quiz}
+      lessonHref={lessonHref}
+      nextHref={next ? `${base}/lessons/${next.id}` : undefined}
+      nextTitle={next?.title}
+    >
+      <Tanuki slot="mascotCheer" pose="cheer" size={120} label="Pon-san cheering" />
+      <Tanuki slot="mascotWave" pose="wave" size={120} label="Pon-san waving" />
+      <div slot="fallback" class="sticker-card p-6 text-center text-ink-soft">Loading quiz…</div>
+    </QuizRunner>
+    <noscript>
+      <p class="sticker-card p-6">The quiz needs JavaScript. You can still read the lesson without it.</p>
+    </noscript>
+  </div>
+</Base>

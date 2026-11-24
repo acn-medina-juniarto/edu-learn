@@ -1,0 +1,58 @@
+---
+/** One vocabulary item: word with reading, meaning, part of speech, politeness, example. */
+import Ja from '@/components/ja/Ja.astro';
+import PolitenessTag from '@/components/ja/PolitenessTag.astro';
+import Mixed from '@/components/ja/Mixed.astro';
+import Icon from '@/components/ui/Icon.astro';
+import AddCardButton from '@/components/flashcards/AddCardButton.astro';
+import { toPlain } from '@/lib/furigana';
+import { POS_LABELS } from '@/lib/labels';
+import type { VocabItem } from '@/lib/schemas';
+
+interface Props {
+  item: VocabItem;
+}
+const { item } = Astro.props;
+const hasKanji = /\p{Script=Han}/u.test(item.word);
+const wordMarkup = hasKanji ? `{${item.word}|${item.reading}}` : item.word;
+---
+
+<li id={`vocab-${item.id}`} class="sticker-card scroll-mt-24 p-4">
+  <div class="flex items-start justify-between gap-3">
+    <div class="min-w-0">
+      <Ja text={wordMarkup} as="p" size="inherit" class="text-[1.75rem] font-medium leading-[1.9]" />
+      <p class="font-display text-lg font-semibold">{item.meaning}</p>
+    </div>
+    <button
+      type="button"
+      class="btn btn-secondary btn-sm flex-none !px-2.5"
+      data-speak={item.word}
+      aria-label={`Play: ${item.word}`}
+    >
+      <Icon name="speaker" />
+    </button>
+  </div>
+  <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-ink-soft">
+    <span>{POS_LABELS[item.pos]}</span>
+    {item.politeness !== 'neutral' && <PolitenessTag level={item.politeness} />}
+    {item.related && (
+      <span>
+        · <Mixed text={item.related} />
+      </span>
+    )}
+  </div>
+  <div class="mt-3 flex items-start gap-2 rounded-[12px] border-2 border-line bg-surface-2 p-3">
+    <div class="min-w-0 flex-1">
+      <Ja text={item.example.ja} en={item.example.en} />
+    </div>
+    <button
+      type="button"
+      class="btn btn-ghost btn-sm flex-none !px-2"
+      data-speak={toPlain(item.example.ja)}
+      aria-label={`Play example: ${toPlain(item.example.ja)}`}
+    >
+      <Icon name="speaker" />
+    </button>
+  </div>
+  <AddCardButton vocabId={item.id} class="mt-3" />
+</li>

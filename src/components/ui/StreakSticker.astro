@@ -1,0 +1,40 @@
+---
+/** Streak as a tilted sticker. Broken streaks get a kind message, never guilt. */
+import Icon from './Icon.astro';
+
+interface Props {
+  days: number;
+  /** true when the learner is returning after a gap */
+  returning?: boolean;
+  class?: string;
+}
+const { days, returning = false, class: className } = Astro.props;
+---
+
+<div
+  class:list={[
+    'inline-flex rotate-[-3deg] items-center gap-3 rounded-[16px] border-2 border-line px-4 py-2.5 shadow-[4px_4px_0_var(--shadow)]',
+    returning ? 'bg-ramune' : 'bg-sunny',
+    'text-on-accent',
+    className,
+  ]}
+>
+  <span class="grid h-10 w-10 place-items-center rounded-full border-2 border-line bg-surface text-ink">
+    <Icon name={returning ? 'sun' : 'flame'} size={22} />
+  </span>
+  <span class="leading-tight">
+    {
+      returning ? (
+        <>
+          <span class="block font-display text-lg font-semibold">Welcome back!</span>
+          <span class="block text-sm">Every day is a fresh start.</span>
+        </>
+      ) : (
+        <>
+          <span class="block font-display text-lg font-semibold">{days}-day streak</span>
+          <span class="block text-sm">Nice and steady.</span>
+        </>
+      )
+    }
+  </span>
+</div>

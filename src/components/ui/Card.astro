@@ -1,0 +1,19 @@
+---
+import type { Category } from '@/lib/categories';
+
+interface Props {
+  category?: Category;
+  /** Show a colored accent strip along the top of the card */
+  strip?: boolean;
+  as?: 'div' | 'article' | 'section' | 'li';
+  class?: string;
+}
+const { category, strip = false, as: Tag = 'div', class: className } = Astro.props;
+---
+
+<Tag class:list={['sticker-card relative overflow-hidden', category && `cat-${category}`, className]}>
+  {strip && <div class="h-3 border-b-2 border-line bg-accent" aria-hidden="true" />}
+  <div class="p-5">
+    <slot />
+  </div>
+</Tag>

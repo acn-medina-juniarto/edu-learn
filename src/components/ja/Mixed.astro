@@ -1,0 +1,20 @@
+---
+/**
+ * Mixed English + Japanese text (with furigana markup). Japanese runs get
+ * lang="ja" automatically. `markdown` enables tables, lists, bold, quotes.
+ */
+import { renderInline, renderMarkdown } from '@/lib/richtext';
+
+interface Props {
+  text: string;
+  markdown?: boolean;
+  as?: 'p' | 'span' | 'div' | 'h2' | 'h3' | 'li';
+  class?: string;
+  id?: string;
+}
+const { text, markdown = false, as, class: className, id } = Astro.props;
+const Tag = as ?? (markdown ? 'div' : 'span');
+const html = markdown ? renderMarkdown(text) : renderInline(text);
+---
+
+<Tag id={id} class:list={[markdown && 'rich', className]} set:html={html} />

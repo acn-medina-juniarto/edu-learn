@@ -1,0 +1,182 @@
+---
+/**
+ * Tap-a-word popup. Any `.vocab-word` button (rendered from {漢字|かな|id}
+ * markup) opens a small card with reading, meaning, part of speech and audio.
+ * Desktop: anchored under the word. Phones: a bottom sheet.
+ * Keyboard: Enter/Space opens, Escape closes and returns focus to the word.
+ */
+import AddCardButton from '@/components/flashcards/AddCardButton.astro';
+import { POLITENESS_LABELS, POS_LABELS } from '@/lib/labels';
+import type { VocabItem } from '@/lib/schemas';
+
+interface Props {
+  vocab: VocabItem[];
+  /** Ids of vocab items listed on this page (to show "See in list") */
+  localIds?: string[];
+}
+const { vocab, localIds = [] } = Astro.props;
+const data = Object.fromEntries(
+  vocab.map((v) => [
+    v.id,
+    {
+      word: v.word,
+      reading: v.reading,
+      meaning: v.meaning,
+      pos: POS_LABELS[v.pos] ?? v.pos,
+      politeness: v.politeness === 'neutral' ? null : POLITENESS_LABELS[v.politeness],
+      related: v.related ?? null,
+      local: localIds.includes(v.id),
+    },
+  ]),
+);
+---
+
+<script is:inline type="application/json" id="vocab-data" set:html={JSON.stringify(data).replace(/</g, '\\u003c')} />
+
+<div
+  id="word-popup"
+  role="dialog"
+  aria-modal="false"
+  aria-labelledby="word-popup-word"
+  hidden
+  class="sticker-card fixed z-50 w-[min(22rem,calc(100vw-2rem))] p-4"
+>
+  <div class="flex items-start justify-between gap-3">
+    <div class="min-w-0">
+      <p lang="ja" id="word-popup-word" class="text-[2rem] font-medium leading-[1.9]"></p>
+      <p id="word-popup-meaning" class="font-display text-lg font-semibold"></p>
+      <p class="text-sm text-ink-soft"><span id="word-popup-pos"></span><span id="word-popup-pol"></span></p>
+      <p id="word-popup-related" class="mt-1 text-sm text-ink-soft"></p>
+    </div>
+    <div class="flex flex-none gap-2">
+      <button type="button" class="btn btn-secondary btn-sm !px-2.5" id="word-popup-speak" aria-label="Play audio">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"></path><path d="M15.5 9a4 4 0 010 6M18 6.5a7.5 7.5 0 010 11"></path></svg>
+      </button>
+      <button type="button" class="btn btn-secondary btn-sm !px-2.5" id="word-popup-close" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mt-3 flex flex-wrap gap-2">
+    <AddCardButton id="word-popup-add" />
+    <a id="word-popup-link" href="#" class="btn btn-ghost btn-sm">See in vocabulary list</a>
+  </div>
+</div>
+
+<style>
+  @media (max-width: 639px) {
+    #word-popup {
+      left: 1rem !important;
+      right: 1rem;
+      top: auto !important;
+      bottom: 1rem;
+      width: auto;
+    }
+  }
+</style>
+
+<script>
+  import { speak } from '@/lib/speech';
+
+  interface PopupVocab {
+    word: string;
+    reading: string;
+    meaning: string;
+    pos: string;
+    politeness: { en: string; ja: string } | null;
+    related: string | null;
+    local: boolean;
+  }
+
+  const dataEl = document.getElementById('vocab-data');
+  const vocab: Record<string, PopupVocab> = dataEl ? JSON.parse(dataEl.textContent || '{}') : {};
+  const popup = document.getElementById('word-popup') as HTMLDivElement | null;
+  const $ = (id: string) => document.getElementById(id)!;
+  let trigger: HTMLElement | null = null;
+
+  function fill(id: string, v: PopupVocab) {
+    const word = $('word-popup-word');
+    word.replaceChildren();
+    const hasKanji = /\p{Script=Han}/u.test(v.word);
+    if (hasKanji) {
+      const ruby = document.createElement('ruby');
+      ruby.append(v.word);
+      const rt = document.createElement('rt');
+      rt.textContent = v.reading;
+      ruby.append(rt);
+      word.append(ruby);
+    } else {
+      word.textContent = v.word;
+    }
+    $('word-popup-meaning').textContent = v.meaning;
+    $('word-popup-pos').textContent = v.pos;
+    $('word-popup-pol').textContent = v.politeness ? ` · ${v.politeness.en} ${v.politeness.ja}` : '';
+    $('word-popup-related').textContent = v.related ? `Related: ${v.related}` : '';
+    const link = $('word-popup-link') as HTMLAnchorElement;
+    link.hidden = !v.local;
+    link.href = `#vocab-${id}`;
+    ($('word-popup-speak') as HTMLButtonElement).dataset.word = v.word;
+    ($('word-popup-add') as HTMLButtonElement).dataset.addCard = id;
+    document.dispatchEvent(new CustomEvent('deck:sync'));
+  }
+
+  function place(anchor: HTMLElement) {
+    if (!popup) return;
+    if (window.matchMedia('(max-width: 639px)').matches) return; // CSS bottom sheet
+    const r = anchor.getBoundingClientRect();
+    const w = popup.offsetWidth;
+    const h = popup.offsetHeight;
+    const left = Math.min(Math.max(16, r.left + r.width / 2 - w / 2), window.innerWidth - w - 16);
+    const below = r.bottom + 10;
+    const top = below + h > window.innerHeight - 16 ? Math.max(16, r.top - h - 10) : below;
+    popup.style.left = `${left}px`;
+    popup.style.top = `${top}px`;
+  }
+
+  function open(btn: HTMLElement) {
+    const id = btn.dataset.vocabId ?? '';
+    const v = vocab[id];
+    if (!popup || !v) return;
+    trigger = btn;
+    fill(id, v);
+    popup.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+    place(btn);
+    ($('word-popup-close') as HTMLButtonElement).focus({ preventScroll: true });
+  }
+
+  function close(restoreFocus = true) {
+    if (!popup || popup.hidden) return;
+    popup.hidden = true;
+    trigger?.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) trigger?.focus({ preventScroll: true });
+    trigger = null;
+  }
+
+  document.querySelectorAll<HTMLElement>('.vocab-word').forEach((b) => {
+    b.setAttribute('aria-haspopup', 'dialog');
+    b.setAttribute('aria-expanded', 'false');
+    b.setAttribute('aria-controls', 'word-popup');
+  });
+
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const word = target.closest<HTMLElement>('.vocab-word');
+    if (word) {
+      e.preventDefault();
+      if (trigger === word) return close();
+      return open(word);
+    }
+    if (popup && !popup.hidden && !popup.contains(target)) close(false);
+  });
+  $('word-popup-close')?.addEventListener('click', () => close());
+  $('word-popup-speak')?.addEventListener('click', (e) => {
+    speak((e.currentTarget as HTMLElement).dataset.word ?? '');
+  });
+  $('word-popup-link')?.addEventListener('click', () => close(false));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') close();
+  });
+  window.addEventListener('resize', () => trigger && place(trigger));
+  window.addEventListener('scroll', () => trigger && place(trigger), { passive: true });
+</script>

@@ -1,0 +1,271 @@
+---
+/**
+ * Home: greeting + streak, continue-learning card (the one primary action),
+ * flashcards due, the lesson path, and study tools.
+ * Rendered for a first-time visitor; a small script personalizes it from saved progress.
+ */
+import Base from '@/layouts/Base.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Icon from '@/components/ui/Icon.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import LiveStreak from '@/components/ui/LiveStreak.astro';
+import Tanuki from '@/components/mascot/Tanuki.astro';
+import Ja from '@/components/ja/Ja.astro';
+import { CATEGORIES } from '@/lib/categories';
+import { getLessons } from '@/lib/content';
+import { toRubyHtml } from '@/lib/furigana';
+
+const lessons = await getLessons();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const first = lessons[0];
+const icon = { meetings: 'book', phone: 'phone', email: 'mail', keigo: 'sparkle' } as const;
+const lessonData = lessons.map((l) => ({
+  id: l.id,
+  order: l.order,
+  title: l.title,
+  titleJa: l.titleJa,
+  category: l.category,
+  minutes: l.minutes,
+  href: `${base}/lessons/${l.id}`,
+}));
+const tools = [
+  { href: `${base}/study`, title: 'Study by level', body: 'Grammar, kanji and reading from JLPT N5 to N1.', cat: 'primary', icon: 'book' },
+  { href: `${base}/flashcards`, title: 'Flashcards', body: 'Spaced-repetition review of every word you have learned.', cat: 'phone', icon: 'cards' },
+  { href: `${base}/keigo`, title: 'Keigo reference', body: 'Honorific, humble and polite forms, searchable.', cat: 'keigo', icon: 'sparkle' },
+  { href: `${base}/email`, title: 'Email builder', body: 'Fill-in templates for common business emails.', cat: 'email', icon: 'mail' },
+  { href: `${base}/progress`, title: 'Your progress', body: 'Streak, scores, activity, and backups.', cat: 'meetings', icon: 'flame' },
+] as const;
+---
+
+<Base title="Biz Nihongo" description="Free business Japanese lessons for English speakers: keigo, emails, phone calls, meetings.">
+  <!-- Greeting -->
+  <section class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center">
+    <Tanuki pose="wave" size={110} label="Pon-san the tanuki waving hello" />
+    <div class="flex-1">
+      <p lang="ja" class="text-2xl font-bold" style="font-family: var(--font-ja-round)" data-greeting>こんにちは！</p>
+      <h1 class="mt-1 text-3xl sm:text-4xl">Business Japanese, 5 minutes at a time</h1>
+    </div>
+    <LiveStreak class="self-start sm:self-center" />
+  </section>
+
+  <!-- Continue learning: the one primary action -->
+  <section class="mb-6 grid gap-5 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]" aria-label="Today">
+    <article class:list={['sticker-card overflow-hidden', `cat-${first.category}`]} data-continue>
+      <div class="h-3 border-b-2 border-line bg-accent" aria-hidden="true" data-continue-strip></div>
+      <div class="p-5">
+        <p class="text-sm font-semibold text-ink-soft" data-continue-kicker>Start here</p>
+        <h2 class="mt-1 text-2xl" data-continue-title>{first.order}. {first.title}</h2>
+        <p lang="ja" class="ja-body text-ink-soft" data-continue-ja set:html={toRubyHtml(first.titleJa)} />
+        <p class="mt-1 text-sm text-ink-soft" data-continue-meta>{first.minutes} min · dialogue, vocabulary, notes and a quiz</p>
+        <a href={`${base}/lessons/${first.id}`} class="btn btn-primary mt-4" data-continue-link>
+          <span data-continue-cta>Start lesson</span>
+          <Icon name="arrow-right" />
+        </a>
+      </div>
+    </article>
+
+    <article class="sticker-card cat-phone flex flex-col p-5" data-due-card>
+      <p class="text-sm font-semibold text-ink-soft">Flashcards today</p>
+      <p class="mt-1 flex items-baseline gap-2">
+        <span class="font-display text-5xl font-semibold tabular-nums" data-due-number>0</span>
+        <span class="text-lg" data-due-label>cards due</span>
+      </p>
+      <p class="mt-1 text-sm text-ink-soft" data-due-body>Finish a lesson and its words join your deck.</p>
+      <a href={`${base}/flashcards`} class="btn btn-secondary mt-auto self-start" data-due-link>
+        <Icon name="cards" /> <span data-due-cta>Open flashcards</span>
+      </a>
+    </article>
+  </section>
+
+  <!-- Lesson path -->
+  <section class="mb-10" aria-labelledby="path-h">
+    <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+      <SectionHeading id="path-h" category="email" class="!mb-0">Lesson path</SectionHeading>
+      <p class="text-sm font-semibold text-ink-soft" data-path-count aria-live="polite">
+        0 of {lessons.length} lessons complete
+      </p>
+    </div>
+    <ol class="lesson-path relative grid gap-3">
+      {
+        lessonData.map((l) => (
+          <li class:list={['relative pl-16', `cat-${l.category}`]} data-path-item={l.id} data-state="upcoming">
+            <span class="path-node absolute left-0 top-3 grid h-12 w-12 place-items-center rounded-full border-2 border-line bg-accent font-display text-lg font-semibold text-on-accent" aria-hidden="true">
+              <span class="node-num">{l.order}</span>
+              <span class="node-done"><Icon name="check" size={22} /></span>
+            </span>
+            <a href={l.href} class="path-card sticker-card flex flex-wrap items-center justify-between gap-2 p-4 no-underline">
+              <span class="min-w-0">
+                <span class="block font-display text-lg font-semibold">{l.title}</span>
+                <Ja text={l.titleJa} class="block text-base text-ink-soft" size="inherit" />
+              </span>
+              <span class="flex flex-wrap items-center gap-2">
+                <Badge category={l.category}>
+                  <Icon name={icon[l.category]} size={14} /> {CATEGORIES[l.category].label}
+                </Badge>
+                <span class="path-status badge !bg-surface !text-ink" data-path-status>{l.minutes} min</span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <!-- Tools -->
+  <section class="mb-10" aria-labelledby="tools-h">
+    <SectionHeading id="tools-h" category="keigo">Study tools</SectionHeading>
+    <ul class="grid gap-4 sm:grid-cols-2">
+      {
+        tools.map((t) => (
+          <li>
+            <a href={t.href} class:list={['sticker-card flex h-full items-start gap-3 p-4 no-underline', `cat-${t.cat}`]}>
+              <span class="grid h-11 w-11 flex-none place-items-center rounded-full border-2 border-line bg-accent text-[var(--accent-ink,var(--on-accent))]">
+                <Icon name={t.icon} />
+              </span>
+              <span>
+                <span class="block font-display text-lg font-semibold">{t.title}</span>
+                <span class="block text-sm text-ink-soft">{t.body}</span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<style>
+  /* Vertical line connecting the path nodes */
+  .lesson-path::before {
+    content: '';
+    position: absolute;
+    left: 23px;
+    top: 1.5rem;
+    bottom: 1.5rem;
+    width: 2px;
+    background: var(--line);
+    opacity: 0.35;
+  }
+  .node-done {
+    display: none;
+  }
+  [data-state='done'] .node-num {
+    display: none;
+  }
+  [data-state='done'] .node-done {
+    display: inline-flex;
+  }
+  [data-state='done'] .path-node {
+    background: var(--success-bg);
+    color: var(--success);
+    border-color: var(--success);
+  }
+  [data-state='next'] .path-node {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+  }
+  [data-state='next'] .path-card {
+    border-width: 3px;
+  }
+  [data-state='done'] .path-status {
+    background: var(--success-bg) !important;
+    color: var(--success) !important;
+  }
+  [data-state='next'] .path-status {
+    background: var(--primary-soft) !important;
+  }
+  .path-card {
+    transition:
+      transform 80ms,
+      box-shadow 80ms;
+  }
+  .path-card:hover,
+  a.sticker-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--shadow);
+  }
+</style>
+
+<script define:vars={{ lessons: lessonData }}>
+  window.__HOME_LESSONS__ = lessons;
+</script>
+
+<script>
+  import { readActivity } from '@/lib/activity';
+  import { toRubyHtml } from '@/lib/furigana';
+
+  interface HomeLesson {
+    id: string;
+    order: number;
+    title: string;
+    titleJa: string;
+    category: string;
+    minutes: number;
+    href: string;
+  }
+  const lessons = (window as unknown as { __HOME_LESSONS__: HomeLesson[] }).__HOME_LESSONS__;
+  const a = readActivity();
+  const $ = <T extends HTMLElement = HTMLElement>(sel: string) => document.querySelector<T>(sel);
+
+  // Greeting by local time of day
+  const h = new Date().getHours();
+  const greet = $('[data-greeting]');
+  if (greet) greet.textContent = h < 11 ? 'おはようございます！' : h < 18 ? 'こんにちは！' : 'こんばんは！';
+
+  // Lesson path states
+  const next = lessons.find((l) => !a.completed.has(l.id));
+  for (const l of lessons) {
+    const item = $(`[data-path-item="${l.id}"]`);
+    if (!item) continue;
+    const done = a.completed.has(l.id);
+    const isNext = next?.id === l.id;
+    item.dataset.state = done ? 'done' : isNext ? 'next' : 'upcoming';
+    const status = item.querySelector('[data-path-status]');
+    if (status) {
+      const best = a.quizBest[l.id];
+      status.textContent = done
+        ? best !== undefined
+          ? `✓ Done · quiz ${Math.round(best * 100)}%`
+          : '✓ Done'
+        : isNext
+          ? 'Up next'
+          : `${l.minutes} min`;
+    }
+  }
+  const countEl = $('[data-path-count]');
+  if (countEl) countEl.textContent = `${a.completed.size} of ${lessons.length} lessons complete`;
+
+  // Continue card
+  const card = $('[data-continue]');
+  const started = a.completed.size > 0;
+  if (card) {
+    if (next) {
+      card.className = card.className.replace(/cat-\w+/, `cat-${next.category}`);
+      $('[data-continue-kicker]')!.textContent = started ? 'Continue where you left off' : 'Start here';
+      $('[data-continue-title]')!.textContent = `${next.order}. ${next.title}`;
+      $('[data-continue-ja]')!.innerHTML = toRubyHtml(next.titleJa);
+      $('[data-continue-meta]')!.textContent = `${next.minutes} min · dialogue, vocabulary, notes and a quiz`;
+      $<HTMLAnchorElement>('[data-continue-link]')!.href = next.href;
+      $('[data-continue-cta]')!.textContent = started ? 'Continue' : 'Start lesson';
+    } else {
+      $('[data-continue-kicker]')!.textContent = 'All lessons complete!';
+      $('[data-continue-title]')!.textContent = 'Keep it fresh with flashcards';
+      $('[data-continue-ja]')!.textContent = 'おつかれさまでした！';
+      $('[data-continue-meta]')!.textContent = 'Go deeper with grammar, kanji and reading in Study.';
+      const link = $<HTMLAnchorElement>('[data-continue-link]')!;
+      link.href = $<HTMLAnchorElement>('[data-due-link]')!.href;
+      $('[data-continue-cta]')!.textContent = 'Review flashcards';
+    }
+  }
+
+  // Flashcards due
+  $('[data-due-number]')!.textContent = String(a.due);
+  $('[data-due-label]')!.textContent = a.due === 1 ? 'card due' : 'cards due';
+  $('[data-due-body]')!.textContent =
+    a.deckSize === 0
+      ? 'Finish a lesson and its words join your deck.'
+      : a.due === 0
+        ? `All caught up. ${a.deckSize} cards are resting in your deck.`
+        : 'A few minutes of review keeps them in memory.';
+  $('[data-due-cta]')!.textContent = a.due > 0 ? `Review ${a.due} ${a.due === 1 ? 'card' : 'cards'}` : 'Open flashcards';
+</script>

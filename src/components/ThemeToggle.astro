@@ -1,0 +1,42 @@
+---
+import Icon from './ui/Icon.astro';
+---
+
+<button
+  type="button"
+  class="btn btn-secondary btn-sm theme-toggle"
+  data-theme-toggle
+  aria-label="Toggle dark mode"
+  aria-pressed="false"
+>
+  <span class="theme-icon-light"><Icon name="moon" /></span>
+  <span class="theme-icon-dark"><Icon name="sun" /></span>
+</button>
+
+<style>
+  .theme-icon-dark {
+    display: none;
+  }
+  :global([data-theme='dark']) .theme-icon-dark {
+    display: inline-flex;
+  }
+  :global([data-theme='dark']) .theme-icon-light {
+    display: none;
+  }
+</style>
+
+<script>
+  import { currentTheme, writePrefs } from '@/lib/prefs';
+
+  function sync(btn: HTMLButtonElement) {
+    const dark = currentTheme() === 'dark';
+    btn.setAttribute('aria-pressed', String(dark));
+  }
+  document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((btn) => {
+    sync(btn);
+    btn.addEventListener('click', () => {
+      writePrefs({ theme: currentTheme() === 'dark' ? 'light' : 'dark' });
+      document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach(sync);
+    });
+  });
+</script>

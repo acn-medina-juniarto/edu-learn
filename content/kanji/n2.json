@@ -1,0 +1,45 @@
+{
+  "level": "N2",
+  "reviewed": false,
+  "kanji": [
+    {
+      "char": "契",
+      "meanings": ["pledge", "contract"],
+      "onyomi": ["ケイ"],
+      "kunyomi": ["ちぎ-る"],
+      "strokes": 9,
+      "businessCommon": true,
+      "examples": [
+        { "word": "契約", "reading": "けいやく", "meaning": "contract" },
+        { "word": "契約書", "reading": "けいやくしょ", "meaning": "written contract" },
+        { "word": "契機", "reading": "けいき", "meaning": "opportunity, turning point" }
+      ]
+    },
+    {
+      "char": "担",
+      "meanings": ["carry", "bear (responsibility)"],
+      "onyomi": ["タン"],
+      "kunyomi": ["かつ-ぐ", "にな-う"],
+      "strokes": 8,
+      "businessCommon": true,
+      "examples": [
+        { "word": "担当", "reading": "たんとう", "meaning": "being in charge" },
+        { "word": "負担", "reading": "ふたん", "meaning": "burden, cost borne" },
+        { "word": "担う", "reading": "になう", "meaning": "to shoulder (a role)" }
+      ]
+    },
+    {
+      "char": "貴",
+      "meanings": ["precious", "noble", "your (honorific)"],
+      "onyomi": ["キ"],
+      "kunyomi": ["たっと-い", "とうと-い"],
+      "strokes": 12,
+      "businessCommon": true,
+      "examples": [
+        { "word": "貴社", "reading": "きしゃ", "meaning": "your company (written)" },
+        { "word": "貴重", "reading": "きちょう", "meaning": "valuable" },
+        { "word": "貴重品", "reading": "きちょうひん", "meaning": "valuables" }
+      ]
+    }
+  ]
+}

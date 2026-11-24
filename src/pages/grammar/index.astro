@@ -1,0 +1,73 @@
+---
+/** /grammar: all grammar points grouped by JLPT level. */
+import Base from '@/layouts/Base.astro';
+import LevelBadge from '@/components/ui/LevelBadge.astro';
+import LevelNav from '@/components/ui/LevelNav.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import Ja from '@/components/ja/Ja.astro';
+import PolitenessTag from '@/components/ja/PolitenessTag.astro';
+import { getGrammar } from '@/lib/content';
+import { LEVELS, LEVEL_IDS, levelClass } from '@/lib/levels';
+
+const grammar = await getGrammar();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const counts = Object.fromEntries(LEVEL_IDS.map((l) => [l, grammar.filter((g) => g.point.level === l).length]));
+---
+
+<Base title="Grammar" description="Business Japanese grammar from JLPT N5 to N1, with workplace examples.">
+  <SectionHeading level={1} category="meetings">Grammar <span lang="ja">文法</span></SectionHeading>
+  <p class="mb-6 max-w-prose text-ink-soft">
+    Each point has a meaning, how to form it, business examples with audio, and when (not) to use it.
+  </p>
+  <LevelNav counts={counts} noun="points" />
+
+  {
+    LEVEL_IDS.map((l) => {
+      const items = grammar.filter((g) => g.point.level === l);
+      return (
+        <section id={l.toLowerCase()} class:list={['mb-10 scroll-mt-20', levelClass(l)]} aria-labelledby={`h-${l}`}>
+          <h2 id={`h-${l}`} class="mb-3 flex flex-wrap items-center gap-3 text-2xl">
+            <LevelBadge level={l} /> {LEVELS[l].name}
+          </h2>
+          {items.length === 0 ? (
+            <p class="text-ink-soft">Coming soon.</p>
+          ) : (
+            <ul class="grid gap-4 md:grid-cols-2">
+              {items.map(({ point: p }) => (
+                <li class="sticker-card relative p-4">
+                  <a href={`${base}/grammar/${p.id}`} class="stretched-link no-underline">
+                    <Ja text={p.pattern} class="block text-2xl font-medium" size="inherit" />
+                  </a>
+                  <p class="mt-1 font-semibold">{p.meaning}</p>
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    <PolitenessTag level={p.politeness} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      );
+    })
+  }
+</Base>
+
+<style>
+  .stretched-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+  }
+  .stretched-link:focus-visible {
+    outline: none;
+  }
+  .stretched-link:focus-visible::after {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  li:has(.stretched-link:hover) {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--shadow);
+  }
+</style>

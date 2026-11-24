@@ -1,0 +1,55 @@
+---
+/** /flashcards: today's SM-2 review queue + deck manager (Preact island, client-only). */
+import Base from '@/layouts/Base.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import Tanuki from '@/components/mascot/Tanuki.astro';
+import Deck from '@/components/flashcards/Deck';
+import type { CardData, LessonInfo } from '@/components/flashcards/types';
+import { getLessons } from '@/lib/content';
+import { POLITENESS_LABELS, POS_LABELS } from '@/lib/labels';
+
+const lessons = await getLessons();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const cards: CardData[] = lessons.flatMap((l) =>
+  l.vocab.map((v) => ({
+    id: v.id,
+    word: v.word,
+    reading: v.reading,
+    meaning: v.meaning,
+    pos: POS_LABELS[v.pos] ?? v.pos,
+    politeness: v.politeness === 'neutral' ? null : { ...POLITENESS_LABELS[v.politeness] },
+    exampleJa: v.example.ja,
+    exampleEn: v.example.en,
+    lessonId: l.id,
+    lessonTitle: l.title,
+    category: l.category,
+  })),
+);
+const lessonInfo: LessonInfo[] = lessons.map((l) => ({
+  id: l.id,
+  order: l.order,
+  title: l.title,
+  category: l.category,
+  href: `${base}/lessons/${l.id}`,
+  vocabIds: l.vocab.map((v) => v.id),
+}));
+---
+
+<Base title="Flashcards" description="Review business Japanese vocabulary with spaced repetition.">
+  <div class="mx-auto mb-6 max-w-2xl">
+    <SectionHeading level={1} category="phone">Flashcards</SectionHeading>
+    <p class="max-w-prose text-ink-soft">
+      Spaced repetition: cards you know well come back less often, and tricky ones come back sooner. Your deck is
+      saved in this browser.
+    </p>
+  </div>
+  <Deck client:only="preact" cards={cards} lessons={lessonInfo} lessonsHref={`${base}/lessons`}>
+    <Tanuki slot="mascotSleepy" pose="sleepy" size={110} label="Pon-san napping" />
+    <Tanuki slot="mascotCheer" pose="cheer" size={120} label="Pon-san cheering" />
+    <div slot="fallback" class="sticker-card mx-auto max-w-md p-6 text-center text-ink-soft">Loading your deck…</div>
+  </Deck>
+  <noscript>
+    <p class="sticker-card mx-auto max-w-md p-6">Flashcards need JavaScript to load your saved deck.</p>
+  </noscript>
+</Base>

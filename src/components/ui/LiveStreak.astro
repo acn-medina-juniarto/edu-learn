@@ -1,0 +1,61 @@
+---
+/**
+ * Streak sticker filled in the browser from saved activity (see src/lib/activity.ts).
+ * Starts in the neutral "Ready when you are" state so it renders without JS.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<div
+  class:list={[
+    'live-streak inline-flex rotate-[-2deg] items-center gap-3 rounded-[16px] border-2 border-line bg-sunny px-4 py-2.5 text-on-accent shadow-[4px_4px_0_var(--shadow)]',
+    className,
+  ]}
+  data-live-streak
+  data-status="none"
+>
+  <span class="grid h-10 w-10 flex-none place-items-center rounded-full border-2 border-line bg-surface text-ink">
+    <span class="streak-flame"><Icon name="flame" size={22} /></span>
+    <span class="streak-sun"><Icon name="sun" size={22} /></span>
+  </span>
+  <span class="leading-tight">
+    <span class="block font-display text-lg font-semibold" data-streak-title>Ready when you are</span>
+    <span class="block text-sm" data-streak-body>Finish a lesson to start your streak.</span>
+  </span>
+</div>
+
+<style>
+  .streak-flame {
+    display: none;
+  }
+  [data-status='active'] .streak-flame,
+  [data-status='pending'] .streak-flame {
+    display: inline-flex;
+  }
+  [data-status='active'] .streak-sun,
+  [data-status='pending'] .streak-sun {
+    display: none;
+  }
+  [data-status='broken'],
+  [data-status='none'] {
+    background: var(--ramune);
+  }
+</style>
+
+<script>
+  import { readActivity } from '@/lib/activity';
+  import { streakMessage } from '@/lib/streak';
+
+  const { streak } = readActivity();
+  const msg = streakMessage(streak);
+  document.querySelectorAll<HTMLElement>('[data-live-streak]').forEach((el) => {
+    el.dataset.status = streak.status;
+    el.querySelector('[data-streak-title]')!.textContent = msg.title;
+    el.querySelector('[data-streak-body]')!.textContent = msg.body;
+  });
+</script>

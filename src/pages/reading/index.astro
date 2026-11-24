@@ -1,0 +1,79 @@
+---
+/** /reading: graded business readings by level. */
+import Base from '@/layouts/Base.astro';
+import LevelBadge from '@/components/ui/LevelBadge.astro';
+import LevelNav from '@/components/ui/LevelNav.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import Ja from '@/components/ja/Ja.astro';
+import PolitenessTag from '@/components/ja/PolitenessTag.astro';
+import { getReading } from '@/lib/content';
+import { LEVELS, LEVEL_IDS, levelClass } from '@/lib/levels';
+
+const passages = await getReading();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const counts = Object.fromEntries(LEVEL_IDS.map((l) => [l, passages.filter((p) => p.level === l).length]));
+const genre = { notice: 'Notice', email: 'Email', memo: 'Memo', letter: 'Letter', article: 'Article', chat: 'Chat' } as const;
+---
+
+<Base title="Reading" description="Short business Japanese readings from JLPT N5 to N1 with glossary and questions.">
+  <SectionHeading level={1} category="email">Reading <span lang="ja">読解</span></SectionHeading>
+  <p class="mb-6 max-w-prose text-ink-soft">
+    Short texts you'd really see at work: notices, emails and letters. Each has furigana, an English translation you
+    can hide, a glossary, and a few questions.
+  </p>
+  <LevelNav counts={counts} noun="readings" />
+
+  {
+    LEVEL_IDS.map((l) => {
+      const items = passages.filter((p) => p.level === l);
+      return (
+        <section id={l.toLowerCase()} class:list={['mb-10 scroll-mt-20', levelClass(l)]} aria-labelledby={`r-${l}`}>
+          <h2 id={`r-${l}`} class="mb-3 flex flex-wrap items-center gap-3 text-2xl">
+            <LevelBadge level={l} /> {LEVELS[l].name}
+          </h2>
+          {items.length === 0 ? (
+            <p class="text-ink-soft">Coming soon.</p>
+          ) : (
+            <ul class="grid gap-4 md:grid-cols-2">
+              {items.map((p) => (
+                <li class="sticker-card relative p-4">
+                  <span class="badge !text-xs">{genre[p.genre]}</span>
+                  <h3 class="mt-2 text-xl">
+                    <a href={`${base}/reading/${p.id}`} class="stretched-link no-underline">
+                      {p.title}
+                    </a>
+                  </h3>
+                  <Ja as="p" text={p.titleJa} />
+                  <p class="mt-1 text-sm text-ink-soft">{p.summary}</p>
+                  <p class="mt-2 flex flex-wrap items-center gap-2 text-sm text-ink-soft">
+                    <PolitenessTag level={p.politeness} /> {p.minutes} min · {p.questions.length} questions
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      );
+    })
+  }
+</Base>
+
+<style>
+  .stretched-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+  }
+  .stretched-link:focus-visible {
+    outline: none;
+  }
+  .stretched-link:focus-visible::after {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  li:has(.stretched-link:hover) {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--shadow);
+  }
+</style>

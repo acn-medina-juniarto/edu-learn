@@ -1,0 +1,106 @@
+---
+/** /grammar/[id]: one grammar point. */
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/ui/Icon.astro';
+import LevelBadge from '@/components/ui/LevelBadge.astro';
+import Ja from '@/components/ja/Ja.astro';
+import Mixed from '@/components/ja/Mixed.astro';
+import PolitenessTag from '@/components/ja/PolitenessTag.astro';
+import LessonToolbar from '@/components/lesson/LessonToolbar.astro';
+import { getGrammar, getLessons } from '@/lib/content';
+import { toPlain } from '@/lib/furigana';
+import { renderMarkdown } from '@/lib/richtext';
+import { levelClass } from '@/lib/levels';
+
+export async function getStaticPaths() {
+  const all = await getGrammar();
+  return all.map(({ point }) => ({ params: { id: point.id } }));
+}
+
+const all = await getGrammar();
+const idx = all.findIndex((g) => g.point.id === Astro.params.id);
+const { entry, point: p } = all[idx];
+const prev = all[idx - 1]?.point;
+const next = all[idx + 1]?.point;
+const lessons = await getLessons();
+const lesson = p.lesson ? lessons.find((l) => l.id === p.lesson) : undefined;
+const related = p.related.map((r) => all.find((g) => g.point.id === r)!.point);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+// Render the Markdown body ourselves so furigana markup works inside it
+const bodyHtml = renderMarkdown(entry.body ?? '');
+---
+
+<Base title={`${toPlain(p.pattern)} · Grammar`} description={p.meaning}>
+  <LessonToolbar slot="toolbar" playAll={false} />
+  <article class:list={['mx-auto max-w-3xl', levelClass(p.level)]}>
+    <nav aria-label="Breadcrumb" class="mb-3 text-sm">
+      <a href={`${base}/grammar#${p.level.toLowerCase()}`} class="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
+        ← Grammar · {p.level}
+      </a>
+    </nav>
+    <div class="mb-2 flex flex-wrap items-center gap-2">
+      <LevelBadge level={p.level} showName />
+      <PolitenessTag level={p.politeness} />
+    </div>
+    <h1 class="text-4xl"><Ja text={p.pattern} size="inherit" /></h1>
+    <p class="mt-2 text-xl font-semibold">{p.meaning}</p>
+
+    <div class="sticker-card mt-5 p-4">
+      <p class="text-sm font-semibold text-ink-soft">How to form it</p>
+      <Mixed as="p" text={p.formation} class="mt-1 text-lg" />
+    </div>
+
+    <section class="mt-8" aria-labelledby="ex-h">
+      <h2 id="ex-h" class="mb-3 text-xl">Examples</h2>
+      <ul class="grid gap-3">
+        {
+          p.examples.map((x) => (
+            <li class="sticker-card flex items-start gap-3 p-4">
+              <div class="min-w-0 flex-1">
+                <Ja text={x.ja} en={x.en} size="dialogue" as="p" />
+                <PolitenessTag level={x.politeness} class="mt-2" />
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm flex-none !px-2.5" data-speak={toPlain(x.ja)} aria-label={`Play: ${toPlain(x.ja)}`}>
+                <Icon name="speaker" />
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="mt-8" aria-labelledby="notes-h">
+      <h2 id="notes-h" class="mb-3 text-xl">How it's used</h2>
+      <div class="rich sticker-card p-5" set:html={bodyHtml} />
+    </section>
+
+    {
+      (lesson || related.length > 0) && (
+        <section class="mt-8" aria-labelledby="see-h">
+          <h2 id="see-h" class="mb-3 text-xl">See also</h2>
+          <ul class="flex flex-wrap gap-2">
+            {lesson && (
+              <li>
+                <a class="btn btn-secondary btn-sm" href={`${base}/lessons/${lesson.id}`}>
+                  <Icon name="book" /> Lesson {lesson.order}: {lesson.title}
+                </a>
+              </li>
+            )}
+            {related.map((r) => (
+              <li>
+                <a class="btn btn-secondary btn-sm" href={`${base}/grammar/${r.id}`}>
+                  <span lang="ja">{toPlain(r.pattern)}</span> <span class="text-ink-soft">({r.level})</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <nav aria-label="Grammar navigation" class="mt-10 flex flex-wrap justify-between gap-3">
+      {prev ? <a class="btn btn-secondary btn-sm" href={`${base}/grammar/${prev.id}`}>← <span lang="ja">{toPlain(prev.pattern)}</span></a> : <span />}
+      {next && <a class="btn btn-secondary btn-sm" href={`${base}/grammar/${next.id}`}><span lang="ja">{toPlain(next.pattern)}</span> →</a>}
+    </nav>
+  </article>
+</Base>

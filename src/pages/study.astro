@@ -1,0 +1,88 @@
+---
+/** /study: hub for the JLPT N5 → N1 sections (grammar, kanji, reading). */
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/ui/Icon.astro';
+import LevelBadge from '@/components/ui/LevelBadge.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import { getGrammar, getKanji, getReading } from '@/lib/content';
+import { LEVELS, LEVEL_IDS, levelClass, type Level } from '@/lib/levels';
+
+const grammar = await getGrammar();
+const kanji = await getKanji();
+const reading = await getReading();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const count = (l: Level) => ({
+  grammar: grammar.filter((g) => g.point.level === l).length,
+  kanji: kanji.find((k) => k.level === l)?.kanji.length ?? 0,
+  reading: reading.filter((r) => r.level === l).length,
+});
+const sections = [
+  { id: 'grammar', title: 'Grammar', ja: '文法', body: 'One pattern at a time, with business examples.', icon: 'book', total: grammar.length, unit: 'points' },
+  { id: 'kanji', title: 'Kanji', ja: '漢字', body: 'Readings, meanings and the words you will meet at work.', icon: 'sparkle', total: kanji.reduce((n, k) => n + k.kanji.length, 0), unit: 'kanji' },
+  { id: 'reading', title: 'Reading', ja: '読解', body: 'Short real-world texts with a glossary and questions.', icon: 'mail', total: reading.length, unit: 'readings' },
+] as const;
+---
+
+<Base title="Study by level" description="Grammar, kanji and reading for business Japanese from JLPT N5 to N1.">
+  <SectionHeading level={1} category="primary">Study by level</SectionHeading>
+  <p class="mb-2 max-w-prose text-ink-soft">
+    Build toward N2–N1 with grammar, kanji and reading, all chosen for the workplace. Lessons teach whole
+    situations, and these sections go deeper into the building blocks.
+  </p>
+  <p class="mb-8 text-sm text-ink-soft">
+    <Icon name="info" size={16} class="mr-1 inline align-[-3px]" />
+    Sample content for now: a few items per level, all awaiting native-speaker review. More will be added over time.
+  </p>
+
+  <ul class="mb-10 grid gap-4 md:grid-cols-3">
+    {
+      sections.map((s) => (
+        <li>
+          <a href={`${base}/${s.id}`} class="sticker-card flex h-full flex-col gap-1 p-5 no-underline hover:-translate-x-0.5 hover:-translate-y-0.5">
+            <span class="flex items-center gap-2">
+              <Icon name={s.icon} />
+              <span class="font-display text-xl font-semibold">{s.title}</span>
+              <span lang="ja" class="text-ink-soft">{s.ja}</span>
+            </span>
+            <span class="text-ink-soft">{s.body}</span>
+            <span class="mt-2 text-sm font-semibold">
+              {s.total} {s.unit} →
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <section aria-labelledby="levels-h">
+    <SectionHeading id="levels-h" category="email">Levels</SectionHeading>
+    <ul class="grid gap-3">
+      {
+        LEVEL_IDS.map((l) => {
+          const c = count(l);
+          return (
+            <li class:list={['sticker-card grid gap-3 p-4 sm:grid-cols-[12rem_minmax(0,1fr)_auto] sm:items-center', levelClass(l)]}>
+              <div>
+                <LevelBadge level={l} />
+                <p class="mt-1 font-display text-lg font-semibold">{LEVELS[l].name}</p>
+              </div>
+              <p class="text-ink-soft">{LEVELS[l].blurb}</p>
+              <div class="flex flex-wrap gap-2">
+                <a class="btn btn-secondary btn-sm" href={`${base}/grammar#${l.toLowerCase()}`}>
+                  {c.grammar} grammar
+                </a>
+                <a class="btn btn-secondary btn-sm" href={`${base}/kanji#${l.toLowerCase()}`}>
+                  {c.kanji} kanji
+                </a>
+                <a class="btn btn-secondary btn-sm" href={`${base}/reading#${l.toLowerCase()}`}>
+                  {c.reading} reading
+                </a>
+              </div>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </section>
+</Base>

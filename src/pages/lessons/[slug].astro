@@ -1,0 +1,219 @@
+---
+/**
+ * Lesson page: header → dialogue → vocabulary → notes → finish.
+ * Sticky toolbar: furigana / English / play dialogue. Tap underlined words for a popup.
+ */
+import { getCollection, render } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Icon from '@/components/ui/Icon.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import Ja from '@/components/ja/Ja.astro';
+import Mixed from '@/components/ja/Mixed.astro';
+import PolitenessTag from '@/components/ja/PolitenessTag.astro';
+import DialogueBubble from '@/components/lesson/DialogueBubble.astro';
+import LessonToolbar from '@/components/lesson/LessonToolbar.astro';
+import LessonComplete from '@/components/lesson/LessonComplete.astro';
+import NoteBlock from '@/components/lesson/NoteBlock.astro';
+import VocabCard from '@/components/lesson/VocabCard.astro';
+import WordPopup from '@/components/lesson/WordPopup.astro';
+import { CATEGORIES } from '@/lib/categories';
+import { getLessons } from '@/lib/content';
+import type { Accent } from '@/lib/types';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('lessons');
+  return entries.map((entry) => ({ params: { slug: entry.data.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const lesson = entry.data;
+const { Content } = await render(entry);
+const all = await getLessons(); // validated + sorted (throws on content errors)
+const idx = all.findIndex((l) => l.id === lesson.id);
+const prev = all[idx - 1];
+const next = all[idx + 1];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const href = (id: string) => `${base}/lessons/${id}`;
+
+const icon = { meetings: 'book', phone: 'phone', email: 'mail', keigo: 'sparkle' } as const;
+const categoryAccent = CATEGORIES[lesson.category].accent as Accent;
+const meAccent: Accent = categoryAccent === 'sunny' ? 'ramune' : 'sunny';
+const speakers = new Map(lesson.dialogue.speakers.map((s) => [s.id, s]));
+const isMe = (id: string) => id === 'me';
+const allVocab = all.flatMap((l) => l.vocab);
+const notesByType = ['keigo', 'grammar', 'culture'] as const;
+const notes = [...lesson.notes].sort((a, b) => notesByType.indexOf(a.type) - notesByType.indexOf(b.type));
+const sections = [
+  ['dialogue', 'Dialogue'],
+  ['vocabulary', 'Vocabulary'],
+  ['notes', 'Notes'],
+  ['finish', 'Finish'],
+];
+---
+
+<Base title={lesson.title} description={lesson.summary}>
+  <LessonToolbar slot="toolbar" />
+
+  <!-- Header -->
+  <header class:list={['mb-8', `cat-${lesson.category}`]}>
+    <nav aria-label="Breadcrumb" class="mb-3 text-sm">
+      <a href={`${base}/lessons`} class="inline-flex min-h-11 items-center gap-1 font-semibold underline underline-offset-4">
+        ← All lessons
+      </a>
+    </nav>
+    <div class="flex flex-wrap items-center gap-2">
+      <Badge category={lesson.category}>
+        <Icon name={icon[lesson.category]} size={14} /> {CATEGORIES[lesson.category].label}
+      </Badge>
+      <Badge category="primary">JLPT {lesson.level}</Badge>
+      <PolitenessTag level={lesson.politeness} />
+      <span class="text-sm text-ink-soft">· {lesson.minutes} min</span>
+      <span class="badge hidden !bg-success-bg !text-success" data-completed-badge>
+        <Icon name="check" size={14} /> Completed
+      </span>
+      <span class="badge hidden !bg-surface !text-ink" data-quiz-badge></span>
+    </div>
+    <h1 class="mt-3 text-3xl sm:text-4xl">
+      <span class="text-ink-soft">{lesson.order}.</span>{' '}{lesson.title}
+    </h1>
+    <Ja as="p" text={lesson.titleJa} class="mt-1 text-xl" size="inherit" />
+    <div class="mt-3 max-w-prose text-lg text-ink-soft">
+      <Content />
+    </div>
+    <div class="sticker-card mt-5 p-4">
+      <p class="mb-2 font-display text-lg font-semibold">In this lesson you will</p>
+      <ul class="grid gap-1.5">
+        {
+          lesson.objectives.map((o) => (
+            <li class="flex gap-2">
+              <Icon name="check" size={20} class="mt-1 flex-none text-success" />
+              <Mixed text={o} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <nav aria-label="Lesson sections" class="mt-5">
+      <ul class="flex flex-wrap gap-2">
+        {
+          sections.map(([id, label]) => (
+            <li>
+              <a href={`#${id}`} class="btn btn-secondary btn-sm">
+                {label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a href={`${href(lesson.id)}/quiz`} class="btn btn-secondary btn-sm">
+            Quiz ({lesson.quiz.length}) →
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Dialogue -->
+  <section id="dialogue" class="mb-12 scroll-mt-20" aria-labelledby="dialogue-h">
+    <SectionHeading id="dialogue-h" category={lesson.category}>Dialogue</SectionHeading>
+    <p class="mb-2 max-w-prose text-ink-soft">{lesson.dialogue.setting}</p>
+    <p class="mb-6 text-sm text-ink-soft">
+      <Icon name="info" size={16} class="mr-1 inline align-[-3px]" />
+      Tap an underlined word to see its meaning.
+    </p>
+    <div class="flex flex-col gap-6">
+      {
+        lesson.dialogue.lines.map((line, i) => {
+          const s = speakers.get(line.speaker)!;
+          return (
+            <DialogueBubble
+              index={i}
+              speakerName={s.name}
+              speakerNameJa={s.nameJa}
+              speakerRole={s.role}
+              ja={line.ja}
+              en={line.en}
+              politeness={line.politeness}
+              note={line.note}
+              speech={line.reading}
+              side={isMe(s.id) ? 'right' : 'left'}
+              accent={isMe(s.id) ? meAccent : categoryAccent}
+            />
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <!-- Vocabulary -->
+  <section id="vocabulary" class="mb-12 scroll-mt-20" aria-labelledby="vocab-h">
+    <SectionHeading id="vocab-h" category={lesson.category}>Vocabulary</SectionHeading>
+    <p class="mb-5 text-ink-soft">{lesson.vocab.length} words and phrases from this lesson.</p>
+    <ul class="grid gap-4 md:grid-cols-2">
+      {lesson.vocab.map((v) => <VocabCard item={v} />)}
+    </ul>
+  </section>
+
+  <!-- Notes -->
+  <section id="notes" class="mb-12 scroll-mt-20" aria-labelledby="notes-h">
+    <SectionHeading id="notes-h" category={lesson.category}>Keigo, grammar &amp; culture</SectionHeading>
+    <div class="grid gap-5">
+      {notes.map((n) => <NoteBlock note={n} />)}
+    </div>
+  </section>
+
+  <!-- Finish -->
+  <div id="finish" class="mb-10 scroll-mt-20">
+    <LessonComplete
+      lessonId={lesson.id}
+      quizHref={`${href(lesson.id)}/quiz`}
+      quizCount={lesson.quiz.length}
+      vocabIds={lesson.vocab.map((v) => v.id)}
+      flashcardsHref={`${base}/flashcards`}
+      nextHref={next ? href(next.id) : undefined}
+      nextTitle={next?.title}
+      lessonsHref={`${base}/lessons`}
+    />
+  </div>
+
+  <!-- Prev / next -->
+  <nav aria-label="Lesson navigation" class="flex flex-wrap justify-between gap-3">
+    {
+      prev ? (
+        <a href={href(prev.id)} class="btn btn-secondary btn-sm">
+          ← {prev.order}. {prev.title}
+        </a>
+      ) : (
+        <span />
+      )
+    }
+    {
+      next && (
+        <a href={href(next.id)} class="btn btn-secondary btn-sm">
+          {next.order}. {next.title} →
+        </a>
+      )
+    }
+  </nav>
+
+  <WordPopup vocab={allVocab} localIds={lesson.vocab.map((v) => v.id)} />
+</Base>
+
+<script>
+  import { readProgress } from '@/lib/progress';
+
+  const id = document.querySelector<HTMLElement>('[data-lesson-complete]')?.dataset.lessonComplete ?? '';
+  const badge = document.querySelector<HTMLElement>('[data-completed-badge]');
+  const show = () => badge?.classList.remove('hidden');
+  const progress = readProgress();
+  if (progress.lessons[id]) show();
+  document.addEventListener('lesson:complete', show);
+
+  const best = progress.quizzes?.[id]?.best;
+  const quizBadge = document.querySelector<HTMLElement>('[data-quiz-badge]');
+  if (quizBadge && best !== undefined) {
+    quizBadge.textContent = `Best quiz score ${Math.round(best * 100)}%`;
+    quizBadge.classList.remove('hidden');
+  }
+</script>

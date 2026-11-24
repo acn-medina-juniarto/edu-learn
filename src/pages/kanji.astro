@@ -1,0 +1,89 @@
+---
+/** /kanji: kanji by JLPT level, with readings, meanings, stroke count and business words. */
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/ui/Icon.astro';
+import LevelBadge from '@/components/ui/LevelBadge.astro';
+import LevelNav from '@/components/ui/LevelNav.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import { getKanji } from '@/lib/content';
+import { LEVELS, LEVEL_IDS, levelClass } from '@/lib/levels';
+
+const files = await getKanji();
+const counts = Object.fromEntries(files.map((f) => [f.level, f.kanji.length]));
+const okurigana = (k: string) => {
+  const [stem, rest] = k.split('-');
+  // Dot + grey: the okurigana boundary is never shown by color alone
+  return rest ? `${stem}<span class="text-ink-soft">.${rest}</span>` : stem;
+};
+---
+
+<Base title="Kanji" description="Business kanji from JLPT N5 to N1 with readings and example words.">
+  <SectionHeading level={1} category="keigo">Kanji <span lang="ja">漢字</span></SectionHeading>
+  <p class="mb-2 max-w-prose text-ink-soft">
+    Kanji you'll meet in business emails and documents. <span lang="ja" class="font-medium">音読み</span> (on'yomi) readings
+    are in katakana, <span lang="ja" class="font-medium">訓読み</span> (kun'yomi) in hiragana. Kana after the dot
+    (<span lang="ja">あ.う</span>) are okurigana.
+  </p>
+  <p class="mb-6 text-sm text-ink-soft">
+    <Icon name="info" size={16} class="mr-1 inline align-[-3px]" />
+    JLPT has published no official kanji list since 2010, so levels follow common study lists.
+  </p>
+  <LevelNav counts={counts} noun="kanji" />
+
+  {
+    LEVEL_IDS.map((l) => {
+      const file = files.find((f) => f.level === l);
+      return (
+        <section id={l.toLowerCase()} class:list={['mb-10 scroll-mt-20', levelClass(l)]} aria-labelledby={`k-${l}`}>
+          <h2 id={`k-${l}`} class="mb-3 flex flex-wrap items-center gap-3 text-2xl">
+            <LevelBadge level={l} /> {LEVELS[l].name}
+          </h2>
+          {!file ? (
+            <p class="text-ink-soft">Coming soon.</p>
+          ) : (
+            <ul class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {file.kanji.map((k) => (
+                <li class="sticker-card overflow-hidden" id={`kanji-${k.char}`}>
+                  <div class="flex items-center gap-4 border-b-2 border-line bg-surface-2 p-4">
+                    <span lang="ja" class="grid h-20 w-20 flex-none place-items-center rounded-[12px] border-2 border-line bg-surface text-5xl font-medium" aria-hidden="true">
+                      {k.char}
+                    </span>
+                    <div class="min-w-0">
+                      <h3 class="sr-only">
+                        Kanji <span lang="ja">{k.char}</span>
+                      </h3>
+                      <p class="font-display text-lg font-semibold">{k.meanings.join(', ')}</p>
+                      <p class="text-sm text-ink-soft">{k.strokes} strokes</p>
+                    </div>
+                  </div>
+                  <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 p-4 text-sm">
+                    <dt class="font-semibold">On</dt>
+                    <dd lang="ja" class="text-base">{k.onyomi.length ? k.onyomi.join('、') : '—'}</dd>
+                    <dt class="font-semibold">Kun</dt>
+                    <dd lang="ja" class="text-base" set:html={k.kunyomi.length ? k.kunyomi.map(okurigana).join('、') : '—'} />
+                  </dl>
+                  <ul class="grid gap-1 px-4 pb-4">
+                    {k.examples.map((x) => (
+                      <li class="flex items-center gap-2">
+                        <ruby lang="ja" class="text-lg">
+                          {x.word}
+                          <rp>(</rp>
+                          <rt>{x.reading}</rt>
+                          <rp>)</rp>
+                        </ruby>
+                        <span class="min-w-0 flex-1 text-sm text-ink-soft">{x.meaning}</span>
+                        <button type="button" class="btn btn-ghost btn-sm flex-none !px-2" data-speak={x.word} aria-label={`Play: ${x.word}`}>
+                          <Icon name="speaker" size={18} />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      );
+    })
+  }
+</Base>

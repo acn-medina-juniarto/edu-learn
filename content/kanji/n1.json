@@ -1,0 +1,45 @@
+{
+  "level": "N1",
+  "reviewed": false,
+  "kanji": [
+    {
+      "char": "承",
+      "meanings": ["acknowledge", "consent", "hear (humbly)"],
+      "onyomi": ["ショウ"],
+      "kunyomi": ["うけたまわ-る"],
+      "strokes": 8,
+      "businessCommon": true,
+      "examples": [
+        { "word": "承知", "reading": "しょうち", "meaning": "understanding, consent" },
+        { "word": "承る", "reading": "うけたまわる", "meaning": "to hear, to receive (humble)" },
+        { "word": "了承", "reading": "りょうしょう", "meaning": "acknowledgment, approval" }
+      ],
+      "needsReview": "JLPT has published no official kanji list since 2010; 承 is listed as N2 in some sources and N1 in others."
+    },
+    {
+      "char": "謹",
+      "meanings": ["respectful", "humble", "discreet"],
+      "onyomi": ["キン"],
+      "kunyomi": ["つつし-む"],
+      "strokes": 17,
+      "businessCommon": true,
+      "examples": [
+        { "word": "謹んで", "reading": "つつしんで", "meaning": "respectfully, humbly" },
+        { "word": "謹啓", "reading": "きんけい", "meaning": "formal letter opening ('Dear Sir/Madam')" },
+        { "word": "謹賀新年", "reading": "きんがしんねん", "meaning": "Happy New Year (formal greeting)" }
+      ]
+    },
+    {
+      "char": "賜",
+      "meanings": ["grant", "bestow"],
+      "onyomi": ["シ"],
+      "kunyomi": ["たまわ-る"],
+      "strokes": 15,
+      "businessCommon": true,
+      "examples": [
+        { "word": "賜る", "reading": "たまわる", "meaning": "to be granted (humble 'receive')" },
+        { "word": "ご愛顧を賜る", "reading": "ごあいこをたまわる", "meaning": "to receive (someone's) continued patronage" }
+      ]
+    }
+  ]
+}

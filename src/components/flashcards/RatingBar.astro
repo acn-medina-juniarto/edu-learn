@@ -1,0 +1,26 @@
+---
+/** Again / Hard / Good / Easy. Each shows a label, a key hint and the next interval. */
+interface Props {
+  intervals?: [string, string, string, string];
+}
+const { intervals = ['< 1 min', '1 day', '3 days', '6 days'] } = Astro.props;
+const ratings = [
+  { id: 'again', label: 'Again', key: '1', fill: 'bg-sakura' },
+  { id: 'hard', label: 'Hard', key: '2', fill: 'bg-sunny' },
+  { id: 'good', label: 'Good', key: '3', fill: 'bg-matcha' },
+  { id: 'easy', label: 'Easy', key: '4', fill: 'bg-ramune' },
+] as const;
+---
+
+<div class="grid grid-cols-2 gap-3 sm:grid-cols-4" role="group" aria-label="How well did you remember?">
+  {
+    ratings.map((r, i) => (
+      <button type="button" class:list={['btn !flex-col !gap-0 !py-2 text-on-accent', r.fill]} data-rating={r.id}>
+        <span>{r.label}</span>
+        <span class="text-xs font-medium opacity-80">
+          {intervals[i]} · key {r.key}
+        </span>
+      </button>
+    ))
+  }
+</div>

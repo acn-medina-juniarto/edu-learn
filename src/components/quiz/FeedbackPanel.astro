@@ -1,0 +1,39 @@
+---
+/** Quiz feedback. Icon + heading text + explanation, so color is never the only signal. */
+import Icon from '@/components/ui/Icon.astro';
+import Ja from '@/components/ja/Ja.astro';
+
+interface Props {
+  kind: 'correct' | 'incorrect';
+  heading?: string;
+  explanation: string;
+  /** Optional model answer in furigana markup */
+  answerJa?: string;
+  class?: string;
+}
+const { kind, heading, explanation, answerJa, class: className } = Astro.props;
+const ok = kind === 'correct';
+---
+
+<div
+  role="status"
+  class:list={[
+    'rounded-[16px] border-2 p-4',
+    ok ? 'border-success bg-success-bg' : 'border-error bg-error-bg',
+    className,
+  ]}
+>
+  <p class:list={['flex items-center gap-2 font-display text-lg font-semibold', ok ? 'text-success' : 'text-error']}>
+    <span
+      class:list={[
+        'grid h-8 w-8 place-items-center rounded-full border-2',
+        ok ? 'border-success' : 'border-error',
+      ]}
+    >
+      <Icon name={ok ? 'check' : 'x'} size={18} />
+    </span>
+    {heading ?? (ok ? 'Correct!' : 'Not quite')}
+  </p>
+  <p class="mt-2 text-base leading-relaxed text-ink">{explanation}</p>
+  {answerJa && <Ja text={answerJa} as="p" class="mt-1 text-ink" />}
+</div>
